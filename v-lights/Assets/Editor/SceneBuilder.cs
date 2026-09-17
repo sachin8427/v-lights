@@ -88,19 +88,19 @@ public static class SceneBuilder
 
         // HUD labels
         var specimenLabel = MakeLabel(canvasGo, "SpecimenLabel", "SPECIMENS 0/21",
-            new Vector2(0f, 0.94f), new Vector2(600, 50), 28);
+            new Vector2(0.5f, 0.97f), new Vector2(600, 50), 28);
         var streakLabel   = MakeLabel(canvasGo, "StreakLabel", "",
-            new Vector2(0f, 0.88f), new Vector2(600, 50), 28);
+            new Vector2(0.5f, 0.91f), new Vector2(600, 50), 28);
         var scoreLabel    = MakeLabel(canvasGo, "ScoreLabel", "0",
-            new Vector2(0f, 0.82f), new Vector2(300, 50), 36);
+            new Vector2(0.5f, 0.85f), new Vector2(300, 50), 36);
         var hullLabel     = MakeLabel(canvasGo, "HullLabel", "\u2665\u2665\u2665",
-            new Vector2(-0.3f, 0.94f), new Vector2(200, 50), 28);
+            new Vector2(0.15f, 0.97f), new Vector2(200, 50), 28);
         var wantedLabel   = MakeLabel(canvasGo, "WantedLabel", "WANTED \u25A1\u25A1\u25A1\u25A1\u25A1",
-            new Vector2(0.3f, 0.94f), new Vector2(300, 50), 22);
+            new Vector2(0.85f, 0.97f), new Vector2(300, 50), 22);
 
-        // Buttons
-        var beamButton  = MakeButton(canvasGo, "BeamButton",  "BEAM",  new Vector2(-0.25f, 0.06f));
-        var boostButton = MakeButton(canvasGo, "BoostButton", "BOOST", new Vector2( 0.25f, 0.06f));
+        // Buttons — anchored to bottom of screen
+        var beamButton  = MakeButton(canvasGo, "BeamButton",  "BEAM",  new Vector2(0.25f, 0.08f));
+        var boostButton = MakeButton(canvasGo, "BoostButton", "BOOST", new Vector2(0.75f, 0.08f));
 
         // Wire HUD references
         hud.specimenLabel = specimenLabel.GetComponent<Text>();
