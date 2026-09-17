@@ -228,7 +228,7 @@ public static class SceneBuilder
             if (importer.spriteImportMode != SpriteImportMode.Single)                  { importer.spriteImportMode = SpriteImportMode.Single; changed = true; }
             if (importer.alphaIsTransparency != alphaIsTransparency)                   { importer.alphaIsTransparency = alphaIsTransparency; changed = true; }
             if (importer.mipmapEnabled)                                                 { importer.mipmapEnabled = false; changed = true; }
-            if (importer.spritePPU != 100)                                             { importer.spritePPU = 100; changed = true; }
+            if (importer.spritePixelsPerUnit != 100)                                    { importer.spritePixelsPerUnit = 100; changed = true; }
             if (importer.filterMode != FilterMode.Bilinear)                            { importer.filterMode = FilterMode.Bilinear; changed = true; }
             var settings = importer.GetDefaultPlatformTextureSettings();
             if (settings.textureCompression != TextureImporterCompression.Uncompressed) {
