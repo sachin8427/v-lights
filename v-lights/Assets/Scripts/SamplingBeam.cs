@@ -29,9 +29,10 @@ public class SamplingBeam : MonoBehaviour
         _mr = gameObject.AddComponent<MeshRenderer>();
         _mr.material = new Material(Shader.Find("Sprites/Default"));
         _mr.material.color = beamColor;
-        // Hide the beam mesh only — never disable the GameObject itself, since
-        // SamplingBeam lives on Player (RequireComponent) and disabling the GO
-        // would disable the whole player and break FindObjectOfType in Spawner.
+        // Must set sorting order explicitly — MeshRenderer defaults to 0 which can
+        // fall behind background SpriteRenderers at the same sorting layer.
+        _mr.sortingLayerName = "Default";
+        _mr.sortingOrder = 8; // in front of all background layers, just below ship (10)
         _mr.enabled = false;
     }
 

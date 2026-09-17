@@ -28,16 +28,81 @@ public static class SceneBuilder
         camGo.AddComponent<AudioListener>();
 
         // ---- BACKGROUND LAYERS ----
-        CreateBgLayer("BackgroundFar", 0.15f, new Color(0.15f, 0.10f, 0.25f), -5f, 0f, 1f);
-        CreateBgLayer("BackgroundMid", 0.40f, new Color(0.20f, 0.14f, 0.30f), -4f, -1f, 0f);
+        // All images are 2172x724 (3:1 aspect). Game is LANDSCAPE side-scroller.
+        // Ortho size 5 → screen is 10 units tall, ~17.8 units wide in landscape 16:9.
+        // Minimum tile width for no seams = 18 units (just over screen width).
+        // At 3:1 aspect: 18w × 6h tiles fit perfectly with uniform scale.
+        //
+        // Layer stack (back to front):
+        //   BackgroundSky  — moon/stars, STATIC, z=-6
+        //   BackgroundMid  — Phoenix skyline (transparent bg), slow scroll, z=-4
+        //   Ground         — street scene, matches world scroll speed, z=-2
 
-        // ---- GROUND ----
+        // Landscape 16:9 at ortho size 5 → ~17.8 units wide, 10 units tall.
+        // All background images are 2172×724 (3:1 aspect).
+        // tileWidth=20 (>17.8) guarantees no seams. At 3:1: tileHeight=6.67≈7.
+        //
+        // Color tints pull all layers into a unified deep-purple night palette.
+
+        const float TW = 20f;  // tile width  — covers landscape screen (17.8 units)
+        const float TH = 6.67f; // tile height — 3:1 aspect
+
+        // Sky: static, fills entire screen. No tiling needed, just make it wide.
+        var skySprite = ImportSprite("Assets/Art/Backgrounds/moon1.png");
+        if (skySprite != null)
+        {
+            var sky = new GameObject("BackgroundSky");
+            var skySr = sky.AddComponent<SpriteRenderer>();
+            skySr.sprite = skySprite;
+            skySr.sortingOrder = -20;
+            skySr.color = new Color(0.7f, 0.7f, 1.0f, 1f); // cool blue tint
+            sky.transform.localScale = SpriteScale(skySprite, 40f, 12f); // 40w covers 2× screen
+            sky.transform.position = new Vector3(0, 0.5f, -6f);
+        }
+        else
+            CreateBgLayer("BackgroundSky", 0f, new Color(0.05f, 0.05f, 0.14f), -6f, 0f, -20f);
+
+        // Mid: Phoenix skyline cutout (transparent bg), slow scroll
+        var skylineSprite = ImportSprite("Assets/Art/Backgrounds/camelback1.png");
+        if (skylineSprite != null)
+        {
+            var mid = new GameObject("BackgroundMid");
+            var midSr = mid.AddComponent<SpriteRenderer>();
+            midSr.sprite = skylineSprite;
+            midSr.sortingOrder = -10;
+            midSr.color = new Color(0.8f, 0.75f, 1.0f, 1f); // warm purple tint
+            mid.transform.localScale = SpriteScale(skylineSprite, TW, TH);
+            mid.transform.position = new Vector3(0, -1.5f, -4f);
+            var midPl = mid.AddComponent<ParallaxLayer>();
+            midPl.scrollFactor = 0.3f;
+            midPl.tileWidth = TW;
+        }
+        else
+            CreateBgLayer("BackgroundMid", 0.3f, new Color(0.20f, 0.14f, 0.30f), -4f, -1.5f, -10f);
+
+        // Foreground street strip — positioned at bottom, tinted night-blue
+        var streetSprite = ImportSprite("Assets/Art/Backgrounds/street1.png");
         var ground = new GameObject("Ground");
         var groundSr = ground.AddComponent<SpriteRenderer>();
-        groundSr.sprite = MakeSolidSprite(new Color(0.08f, 0.05f, 0.10f));
-        groundSr.drawMode = SpriteDrawMode.Sliced;
-        ground.transform.position = new Vector3(0, -4.5f, 0);
-        ground.transform.localScale = new Vector3(30f, 1f, 1f);
+        if (streetSprite != null)
+        {
+            groundSr.sprite = streetSprite;
+            groundSr.sortingOrder = -5;
+            groundSr.color = new Color(0.85f, 0.82f, 1.0f, 1f); // slight purple tint
+            ground.transform.localScale = SpriteScale(streetSprite, TW, TH);
+            // Bottom edge at y=-5 (screen bottom): center = -5 + TH/2
+            ground.transform.position = new Vector3(0, -5f + TH * 0.5f, -2f);
+            var streetPl = ground.AddComponent<ParallaxLayer>();
+            streetPl.scrollFactor = 1f;
+            streetPl.tileWidth = TW;
+        }
+        else
+        {
+            groundSr.sprite = MakeSolidSprite(new Color(0.08f, 0.05f, 0.10f));
+            groundSr.drawMode = SpriteDrawMode.Sliced;
+            ground.transform.position = new Vector3(0, -4.5f, 0);
+            ground.transform.localScale = new Vector3(30f, 1f, 1f);
+        }
 
         // ---- GAME MANAGER ----
         var gmGo = new GameObject("GameManager");
@@ -94,8 +159,8 @@ public static class SceneBuilder
         canvas.renderMode = RenderMode.ScreenSpaceOverlay;
         var scaler = canvasGo.AddComponent<CanvasScaler>();
         scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-        scaler.referenceResolution = new Vector2(1170, 2532); // iPhone 14 Pro
-        scaler.matchWidthOrHeight = 0.5f;
+        scaler.referenceResolution = new Vector2(2532, 1170); // iPhone 14 Pro landscape
+        scaler.matchWidthOrHeight = 1f; // match height — the fixed axis in landscape
         canvasGo.AddComponent<GraphicRaycaster>();
         var hud = canvasGo.AddComponent<HUDController>();
 
@@ -173,6 +238,29 @@ public static class SceneBuilder
     }
 
     // ---- Helpers ----
+
+    // Import a PNG at assetPath as a Sprite, setting correct import settings.
+    static Sprite ImportSprite(string assetPath)
+    {
+        if (!System.IO.File.Exists(System.IO.Path.Combine(Application.dataPath, "..", assetPath)))
+            return null;
+        AssetDatabase.ImportAsset(assetPath, ImportAssetOptions.Default);
+        var importer = AssetImporter.GetAtPath(assetPath) as TextureImporter;
+        if (importer != null)
+        {
+            bool changed = false;
+            if (importer.textureType != TextureImporterType.Sprite)      { importer.textureType = TextureImporterType.Sprite; changed = true; }
+            if (importer.spriteImportMode != SpriteImportMode.Single)    { importer.spriteImportMode = SpriteImportMode.Single; changed = true; }
+            if (!importer.alphaIsTransparency)                            { importer.alphaIsTransparency = true; changed = true; }
+            if (importer.mipmapEnabled)                                   { importer.mipmapEnabled = false; changed = true; }
+            if (changed) AssetDatabase.ImportAsset(assetPath, ImportAssetOptions.ForceUpdate);
+        }
+        return AssetDatabase.LoadAssetAtPath<Sprite>(assetPath);
+    }
+
+    // Returns localScale to display a sprite at the given world dimensions (worldW x worldH units).
+    static Vector3 SpriteScale(Sprite sprite, float worldW, float worldH) =>
+        new Vector3(worldW / sprite.bounds.size.x, worldH / sprite.bounds.size.y, 1f);
 
     static void CreateBgLayer(string name, float scrollFactor, Color color, float z, float y, float sortOrder)
     {
