@@ -30,6 +30,7 @@ public class GameManager : MonoBehaviour
 
     ExpeditionList _expeditions;
     float _invulnTimer;
+    float _playTimer;
 
     void Awake()
     {
@@ -43,7 +44,7 @@ public class GameManager : MonoBehaviour
     {
         CurrentExpedition = _expeditions.Get(expeditionId);
         score = 0; streak = 0; hull = 3;
-        wantedLevel = 0;
+        wantedLevel = 0; _playTimer = 0f;
         specimensThisRun = 0; specimensThisExpedition = 0;
         State = GameState.Playing;
         OnHudDirty?.Invoke();
@@ -57,7 +58,7 @@ public class GameManager : MonoBehaviour
         score += pts;
         specimensThisRun++;
         specimensThisExpedition++;
-        wantedLevel = Mathf.Min(5, specimensThisRun / 4);  // attention grows as you sample
+        wantedLevel = Mathf.Min(5, specimensThisRun / 2);  // attention grows as you sample
         bool first = !SaveData.IsCollected(data.id);
         SaveData.SetCollected(data.id);
         OnSpecimenCaptured?.Invoke(data, pts);
@@ -100,6 +101,19 @@ public class GameManager : MonoBehaviour
     void Update()
     {
         if (_invulnTimer > 0) _invulnTimer -= Time.deltaTime;
+
+        if (State == GameState.Playing)
+        {
+            _playTimer += Time.deltaTime;
+            // Time-based escalation: wanted level rises every 15s regardless of captures,
+            // so even short expeditions show visible difficulty increase
+            int timeBased = Mathf.Min(5, (int)(_playTimer / 10f));
+            if (timeBased > wantedLevel)
+            {
+                wantedLevel = timeBased;
+                OnHudDirty?.Invoke();
+            }
+        }
 
         if (State == GameState.Title)
         {

@@ -52,19 +52,21 @@ public class Spawner : MonoBehaviour
         if (!gm.IsPlaying) return;
         var exp = gm.CurrentExpedition;
 
+        // wanted 0=100%, 1=80%, 2=60%, 3=40%, 4=20%, 5=capped at 20% of base interval
+        float wantedScale = Mathf.Max(0.2f, 1f - gm.wantedLevel * 0.20f);
+
         _specTimer -= Time.deltaTime;
         if (_specTimer <= 0)
         {
             SpawnSpecimen(exp);
-            _specTimer = Random.Range(1.2f, 2.6f);
+            _specTimer = Random.Range(1.2f, 2.6f) * wantedScale;
         }
 
-        float wantedScale = 1f - gm.wantedLevel * 0.12f; // wanted 5 -> 40% faster spawns
         _hazTimer -= Time.deltaTime;
         if (_hazTimer <= 0)
         {
             SpawnHazard(exp);
-            _hazTimer = exp.hazardInterval * Mathf.Max(0.35f, wantedScale) * Random.Range(0.8f, 1.2f);
+            _hazTimer = exp.hazardInterval * wantedScale * Random.Range(0.8f, 1.2f);
         }
     }
 
