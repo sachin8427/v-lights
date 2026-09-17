@@ -1,0 +1,48 @@
+# Unity generated
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Bb]uild/
+[Bb]uilds/
+[Ll]ogs/
+[Uu]ser[Ss]ettings/
+*.pidb.meta
+*.pdb.meta
+*.mdb.meta
+
+# Unity cache
+*.pidb
+*.pdb
+*.mdb
+crashlytics-build.properties
+
+# Visual Studio / Rider
+.vs/
+*.csproj
+*.unityproj
+*.sln
+*.suo
+*.tmp
+*.user
+*.userprefs
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.opendb
+*.VC.db
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+*.DS_Store
+
+# Claude Code local settings (keep CLAUDE.md, not local overrides)
+.claude/settings.local.json
+
+# Unity asset meta files (keep these — needed for Unity to track assets)
+# DO NOT ignore *.meta
+
+# Packages
+/[Pp]ackages/

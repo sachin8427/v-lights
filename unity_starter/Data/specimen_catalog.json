@@ -1,0 +1,224 @@
+{
+  "specimens": [
+    {
+      "id": "SUBJ-003",
+      "name": "Urban Pigeon",
+      "expedition": 1,
+      "rarity": "Common",
+      "points": 10,
+      "beamTime": 0.8,
+      "sprite": "specimen_pigeon",
+      "flavor": "Navigates by mechanisms unknown. Roosts on statues of local leaders. Bold."
+    },
+    {
+      "id": "SUBJ-008",
+      "name": "Alley Cat",
+      "expedition": 1,
+      "rarity": "Common",
+      "points": 15,
+      "beamTime": 1.0,
+      "sprite": "specimen_cat",
+      "flavor": "Nocturnal. Judges the researcher. Evades capture with contempt."
+    },
+    {
+      "id": "SUBJ-024",
+      "name": "Golf Cart",
+      "expedition": 1,
+      "rarity": "Uncommon",
+      "points": 50,
+      "beamTime": 2.0,
+      "sprite": "specimen_golfcart",
+      "flavor": "Small wheeled transport. Top speed: leisurely. Often driven by humans in visors. Visors serve no purpose."
+    },
+    {
+      "id": "SUBJ-031",
+      "name": "Taco Truck",
+      "expedition": 1,
+      "rarity": "Rare",
+      "points": 150,
+      "beamTime": 3.5,
+      "sprite": "specimen_tacotruck",
+      "flavor": "Migratory. Emits warmth and complex aromas. Local humans queue voluntarily. Purpose unknown. Further study required."
+    },
+    {
+      "id": "SUBJ-011",
+      "name": "Desert Cottontail",
+      "expedition": 2,
+      "rarity": "Common",
+      "points": 10,
+      "beamTime": 0.8,
+      "sprite": "specimen_cottontail",
+      "flavor": "Ears function as radiators. Flees at 29 km/h. Adorable. Note: maintain professional detachment."
+    },
+    {
+      "id": "SUBJ-019",
+      "name": "Roadrunner",
+      "expedition": 2,
+      "rarity": "Uncommon",
+      "points": 45,
+      "beamTime": 1.5,
+      "sprite": "specimen_roadrunner",
+      "flavor": "Velocity: absurd. Capture required 14 attempts. Recommend faster beam."
+    },
+    {
+      "id": "SUBJ-022",
+      "name": "Javelina",
+      "expedition": 2,
+      "rarity": "Uncommon",
+      "points": 55,
+      "beamTime": 1.8,
+      "sprite": "specimen_javelina",
+      "flavor": "Not a pig. Will correct you. Travels in squadrons. Smells of consensus."
+    },
+    {
+      "id": "SUBJ-002",
+      "name": "Saguaro",
+      "expedition": 2,
+      "rarity": "Rare",
+      "points": 120,
+      "beamTime": 3.0,
+      "sprite": "specimen_saguaro",
+      "flavor": "Flora. Stands motionless for decades. Either patient or deceased. Unclear."
+    },
+    {
+      "id": "SUBJ-014",
+      "name": "Mule Deer",
+      "expedition": 3,
+      "rarity": "Common",
+      "points": 15,
+      "beamTime": 1.0,
+      "sprite": "specimen_muledeer",
+      "flavor": "Ears oversized. Hearing: excellent. Listens to the vortex. We all hear it."
+    },
+    {
+      "id": "SUBJ-037",
+      "name": "Crystal Shop Quartz",
+      "expedition": 3,
+      "rarity": "Uncommon",
+      "points": 60,
+      "beamTime": 2.2,
+      "sprite": "specimen_quartz",
+      "flavor": "Humans ascribe healing properties. Healing unconfirmed. Sparkle confirmed."
+    },
+    {
+      "id": "SUBJ-040",
+      "name": "Hot Air Balloon",
+      "expedition": 3,
+      "rarity": "Rare",
+      "points": 140,
+      "beamTime": 3.2,
+      "sprite": "specimen_balloon",
+      "flavor": "Primitive lighter-than-air craft. Occupants wave. We wave back. Protocol unclear."
+    },
+    {
+      "id": "SUBJ-026",
+      "name": "Gila Monster",
+      "expedition": 3,
+      "rarity": "Rare",
+      "points": 130,
+      "beamTime": 2.8,
+      "sprite": "specimen_gila",
+      "flavor": "Venomous. Orange and black. Dresses like a warning sign."
+    },
+    {
+      "id": "SUBJ-009",
+      "name": "Kangaroo Rat",
+      "expedition": 4,
+      "rarity": "Common",
+      "points": 12,
+      "beamTime": 0.7,
+      "sprite": "specimen_krat",
+      "flavor": "Never drinks water. Exists on spite and seeds."
+    },
+    {
+      "id": "SUBJ-015",
+      "name": "Coyote",
+      "expedition": 4,
+      "rarity": "Uncommon",
+      "points": 50,
+      "beamTime": 1.6,
+      "sprite": "specimen_coyote",
+      "flavor": "Vocalizes at the moon. Moon does not respond. Persistence admirable."
+    },
+    {
+      "id": "SUBJ-033",
+      "name": "Great Horned Owl",
+      "expedition": 4,
+      "rarity": "Rare",
+      "points": 110,
+      "beamTime": 2.5,
+      "sprite": "specimen_owl",
+      "flavor": "Silent flight. Judges from above. Superior to pigeon in every metric."
+    },
+    {
+      "id": "SUBJ-029",
+      "name": "Bobcat",
+      "expedition": 4,
+      "rarity": "Rare",
+      "points": 125,
+      "beamTime": 2.6,
+      "sprite": "specimen_bobcat",
+      "flavor": "Tufted ears. Has never paid taxes. Respect."
+    },
+    {
+      "id": "SUBJ-050",
+      "name": "Lost Dutchman's Gold",
+      "expedition": 4,
+      "rarity": "Legendary",
+      "points": 400,
+      "beamTime": 4.5,
+      "sprite": "specimen_gold",
+      "flavor": "Legendary mineral cache of the Superstitions. Every human seeks it. None find it. We found it in 12 seconds."
+    },
+    {
+      "id": "SUBJ-012",
+      "name": "Longhorn",
+      "expedition": 5,
+      "rarity": "Uncommon",
+      "points": 60,
+      "beamTime": 2.0,
+      "sprite": "specimen_longhorn",
+      "flavor": "Horn span exceeds body length. Suspected intraspecies jousting. Docile unless startled."
+    },
+    {
+      "id": "SUBJ-035",
+      "name": "Flamingo Pool Float",
+      "expedition": 5,
+      "rarity": "Uncommon",
+      "points": 45,
+      "beamTime": 1.4,
+      "sprite": "specimen_float",
+      "flavor": "Inflatable wading bird. Not a bird. Humans float beside it. Ritual significance suspected."
+    },
+    {
+      "id": "SUBJ-044",
+      "name": "Snowbird RV",
+      "expedition": 5,
+      "rarity": "Rare",
+      "points": 160,
+      "beamTime": 3.8,
+      "sprite": "specimen_rv",
+      "flavor": "Seasonal migration vehicle. Occupants flee cold. We understand. We also flee cold."
+    },
+    {
+      "id": "SUBJ-001",
+      "name": "The Light",
+      "expedition": 5,
+      "rarity": "Legendary",
+      "points": 500,
+      "beamTime": 5.0,
+      "sprite": "specimen_light",
+      "flavor": "One of the Phoenix Lights, sampled at last. It is warm. It is... familiar. Classification pending. Do not think about it."
+    },
+    {
+      "id": "SUBJ-028",
+      "name": "[RECORD SEALED]",
+      "expedition": 0,
+      "rarity": "Sealed",
+      "points": 0,
+      "beamTime": 0,
+      "sprite": "specimen_redacted",
+      "flavor": "Subject is human. Ethics board ruling 7-B: DO NOT SAMPLE. This entry does not exist."
+    }
+  ]
+}

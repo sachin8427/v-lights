@@ -1,0 +1,169 @@
+{
+  "expeditions": [
+    {
+      "id": 1,
+      "name": "Phoenix Metro",
+      "tagline": "First contact, downtown",
+      "scrollSpeed": 3.0,
+      "quota": 6,
+      "hazardInterval": 5.0,
+      "hazards": [
+        "Chopper"
+      ],
+      "backgroundFar": "desert_panorama",
+      "backgroundMid": "phoenix_skyline",
+      "specimens": [
+        {
+          "specimenId": "SUBJ-003",
+          "weight": 3
+        },
+        {
+          "specimenId": "SUBJ-008",
+          "weight": 3
+        },
+        {
+          "specimenId": "SUBJ-024",
+          "weight": 1.5
+        },
+        {
+          "specimenId": "SUBJ-031",
+          "weight": 0.7
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Camelback Foothills",
+      "tagline": "The desert wakes up",
+      "scrollSpeed": 3.5,
+      "quota": 8,
+      "hazardInterval": 4.2,
+      "hazards": [
+        "Chopper",
+        "Balloon"
+      ],
+      "backgroundFar": "desert_panorama",
+      "backgroundMid": "desert_panorama",
+      "specimens": [
+        {
+          "specimenId": "SUBJ-011",
+          "weight": 3
+        },
+        {
+          "specimenId": "SUBJ-019",
+          "weight": 1.8
+        },
+        {
+          "specimenId": "SUBJ-022",
+          "weight": 1.5
+        },
+        {
+          "specimenId": "SUBJ-002",
+          "weight": 0.8
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Sedona",
+      "tagline": "Vortex country",
+      "scrollSpeed": 4.0,
+      "quota": 8,
+      "hazardInterval": 3.8,
+      "hazards": [
+        "Chopper",
+        "Jet"
+      ],
+      "backgroundFar": "sedona_redrocks",
+      "backgroundMid": "sedona_redrocks",
+      "specimens": [
+        {
+          "specimenId": "SUBJ-014",
+          "weight": 3
+        },
+        {
+          "specimenId": "SUBJ-037",
+          "weight": 1.6
+        },
+        {
+          "specimenId": "SUBJ-026",
+          "weight": 1.0
+        },
+        {
+          "specimenId": "SUBJ-040",
+          "weight": 0.8
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "name": "Deep Desert Night",
+      "tagline": "Nothing sleeps out here",
+      "scrollSpeed": 4.5,
+      "quota": 10,
+      "hazardInterval": 3.2,
+      "hazards": [
+        "Chopper",
+        "Jet",
+        "Balloon"
+      ],
+      "backgroundFar": "desert_panorama",
+      "backgroundMid": "desert_panorama",
+      "specimens": [
+        {
+          "specimenId": "SUBJ-009",
+          "weight": 3
+        },
+        {
+          "specimenId": "SUBJ-015",
+          "weight": 1.8
+        },
+        {
+          "specimenId": "SUBJ-033",
+          "weight": 1.0
+        },
+        {
+          "specimenId": "SUBJ-029",
+          "weight": 1.0
+        },
+        {
+          "specimenId": "SUBJ-050",
+          "weight": 0.25
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "name": "The Lights Return",
+      "tagline": "Same sky. Different wonders.",
+      "scrollSpeed": 5.0,
+      "quota": 12,
+      "hazardInterval": 2.6,
+      "hazards": [
+        "Chopper",
+        "Jet",
+        "Balloon"
+      ],
+      "backgroundFar": "desert_panorama",
+      "backgroundMid": "phoenix_skyline",
+      "specimens": [
+        {
+          "specimenId": "SUBJ-012",
+          "weight": 2.5
+        },
+        {
+          "specimenId": "SUBJ-035",
+          "weight": 2.0
+        },
+        {
+          "specimenId": "SUBJ-044",
+          "weight": 1.0
+        },
+        {
+          "specimenId": "SUBJ-001",
+          "weight": 0.2
+        }
+      ]
+    }
+  ]
+}
