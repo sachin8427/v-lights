@@ -121,8 +121,8 @@ public static class SceneBuilder
         hud.boostButton   = boostButton;
 
         // ---- PANELS ----
-        var titlePanel    = MakePanel(canvasGo, "TitlePanel",     new Color(0f, 0f, 0f, 0.85f), "TAP TO START\n\nV-LIGHTS: Phoenix",     startActive: true);
-        var gameOverPanel = MakePanel(canvasGo, "GameOverPanel",  new Color(0f, 0f, 0f, 0.85f), "EXPEDITION COMPLETE\n\nSCORE: 0",        startActive: false);
+        var titlePanel    = MakePanel(canvasGo, "TitlePanel",     new Color(0f, 0f, 0f, 0.85f), "V-LIGHTS: PHOENIX\n\nTAP TO FLY\n\nDRAG to fly  —  HOLD to beam",  startActive: true);
+        var gameOverPanel = MakePanel(canvasGo, "GameOverPanel",  new Color(0f, 0f, 0f, 0.85f), "SIGNAL LOST\n\nSCORE: 0\n\nTAP TO FLY AGAIN",                        startActive: false);
         MakePanel(canvasGo, "FieldGuidePanel", new Color(0.05f, 0.05f, 0.15f, 0.95f), "FIELD GUIDE\n\n(collection grid — Story 3.3)", startActive: false);
         MakePanel(canvasGo, "ShopPanel",       new Color(0.05f, 0.05f, 0.15f, 0.95f), "SHOP\n\n(IAP — Story 4.1)",                    startActive: false);
 

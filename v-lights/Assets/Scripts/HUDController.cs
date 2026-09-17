@@ -73,6 +73,6 @@ public class HUDController : MonoBehaviour
         if (titlePanel)    titlePanel.SetActive(gm.State == GameState.Title);
         if (gameOverPanel) gameOverPanel.SetActive(gm.State == GameState.GameOver);
         if (gameOverLabel && gm.State == GameState.GameOver)
-            gameOverLabel.text = $"EXPEDITION COMPLETE\n\nSCORE: {gm.score:N0}";
+            gameOverLabel.text = $"SIGNAL LOST\n\nSCORE: {gm.score:N0}\n\nTAP TO FLY AGAIN";
     }
 }

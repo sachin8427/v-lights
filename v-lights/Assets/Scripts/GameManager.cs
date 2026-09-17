@@ -115,11 +115,17 @@ public class GameManager : MonoBehaviour
             }
         }
 
-        if (State == GameState.Title)
+        bool tapped = Input.GetMouseButtonDown(0) ||
+                      (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began);
+
+        if (State == GameState.Title && tapped)
+            StartExpedition(1);
+
+        // Tap GameOver panel to return to title (completes the loop)
+        if (State == GameState.GameOver && tapped)
         {
-            bool tapped = Input.GetMouseButtonDown(0) ||
-                          (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began);
-            if (tapped) StartExpedition(1);
+            State = GameState.Title;
+            OnHudDirty?.Invoke();
         }
     }
 
