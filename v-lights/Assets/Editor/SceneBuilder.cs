@@ -123,13 +123,29 @@ public static class SceneBuilder
         // ---- PANELS ----
         var titlePanel    = MakePanel(canvasGo, "TitlePanel",     new Color(0f, 0f, 0f, 0.85f), "V-LIGHTS: PHOENIX\n\nTAP TO FLY\n\nDRAG to fly  —  HOLD to beam",  startActive: true);
         var gameOverPanel = MakePanel(canvasGo, "GameOverPanel",  new Color(0f, 0f, 0f, 0.85f), "SIGNAL LOST\n\nSCORE: 0\n\nTAP TO FLY AGAIN",                        startActive: false);
-        MakePanel(canvasGo, "FieldGuidePanel", new Color(0.05f, 0.05f, 0.15f, 0.95f), "FIELD GUIDE\n\n(collection grid — Story 3.3)", startActive: false);
-        MakePanel(canvasGo, "ShopPanel",       new Color(0.05f, 0.05f, 0.15f, 0.95f), "SHOP\n\n(IAP — Story 4.1)",                    startActive: false);
+        // Add FLY AGAIN button to GameOverPanel (onClick wired in HUDController.Start)
+        var flyAgainBtn = MakeButton(gameOverPanel, "FlyAgainButton", "FLY AGAIN", new Vector2(0.5f, 0.22f));
+        flyAgainBtn.GetComponent<RectTransform>().sizeDelta = new Vector2(280, 80);
+
+        var fieldGuidePanel = MakeFieldGuidePanel(canvasGo);
+        MakePanel(canvasGo, "ShopPanel", new Color(0.05f, 0.05f, 0.15f, 0.95f), "SHOP\n\n(IAP — Story 4.1)", startActive: false);
+        var fgController = fieldGuidePanel.GetComponent<FieldGuideController>();
+
+        // GUIDE button lives AFTER panels in canvas order so it renders on top.
+        // Only functional on GameOver screen (natural between-runs moment).
+        var fgButton = MakeButton(canvasGo, "FieldGuideButton", "GUIDE", new Vector2(0.15f, 0.35f));
+        fgButton.GetComponent<RectTransform>().sizeDelta = new Vector2(180, 70);
+        fgButton.GetComponent<Image>().color = new Color(0.22f, 0.40f, 0.72f, 0.9f);
+        fgButton.GetComponent<Button>().onClick.AddListener(() => fieldGuidePanel.SetActive(true));
+        fgButton.SetActive(false); // shown by HUD only on GameOver
 
         // Wire panel refs into HUD
-        hud.titlePanel    = titlePanel;
-        hud.gameOverPanel = gameOverPanel;
-        hud.gameOverLabel = gameOverPanel.GetComponentInChildren<Text>();
+        hud.titlePanel       = titlePanel;
+        hud.gameOverPanel    = gameOverPanel;
+        hud.gameOverLabel    = gameOverPanel.GetComponentInChildren<Text>();
+        hud.fieldGuide       = fgController;
+        hud.fieldGuideButton = fgButton;
+        hud.flyAgainButton   = flyAgainBtn.GetComponent<Button>();
 
         // ---- PREFABS ----
         CreateSpecimenPrefab();
@@ -225,6 +241,80 @@ public static class SceneBuilder
         t.alignment = TextAnchor.MiddleCenter;
         t.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
         return go;
+    }
+
+    static GameObject MakeFieldGuidePanel(GameObject parent)
+    {
+        var panel = new GameObject("FieldGuidePanel");
+        panel.transform.SetParent(parent.transform, false);
+        var panelRt = panel.AddComponent<RectTransform>();
+        panelRt.anchorMin = Vector2.zero; panelRt.anchorMax = Vector2.one;
+        panelRt.sizeDelta = Vector2.zero;
+        var panelBg = panel.AddComponent<Image>();
+        panelBg.color = new Color(0.04f, 0.04f, 0.12f, 1f);
+
+        // Header
+        var header = new GameObject("Header");
+        header.transform.SetParent(panel.transform, false);
+        var headerRt = header.AddComponent<RectTransform>();
+        headerRt.anchorMin = new Vector2(0, 0.92f); headerRt.anchorMax = Vector2.one;
+        headerRt.sizeDelta = Vector2.zero;
+        var headerText = header.AddComponent<Text>();
+        headerText.text = "FIELD GUIDE";
+        headerText.fontSize = 36; headerText.fontStyle = FontStyle.Bold;
+        headerText.color = new Color(1f, 0.88f, 0.45f);
+        headerText.alignment = TextAnchor.MiddleCenter;
+        headerText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+
+        // Close button
+        var closeBtn = MakeButton(panel, "CloseButton", "X", new Vector2(0.95f, 0.96f));
+        closeBtn.GetComponent<RectTransform>().sizeDelta = new Vector2(60, 60);
+        closeBtn.GetComponent<Image>().color = new Color(0.6f, 0.1f, 0.1f, 0.8f);
+
+        // ScrollView
+        var scrollGo = new GameObject("ScrollView");
+        scrollGo.transform.SetParent(panel.transform, false);
+        var scrollRt = scrollGo.AddComponent<RectTransform>();
+        scrollRt.anchorMin = new Vector2(0.02f, 0.02f);
+        scrollRt.anchorMax = new Vector2(0.98f, 0.91f);
+        scrollRt.sizeDelta = Vector2.zero;
+        var scrollRect = scrollGo.AddComponent<ScrollRect>();
+        scrollRect.horizontal = false;
+        var scrollBg = scrollGo.AddComponent<Image>();
+        scrollBg.color = new Color(0, 0, 0, 0.1f);
+
+        // Viewport — use RectMask2D (clips by rect geometry, not alpha, so no transparent-image gotcha)
+        var viewport = new GameObject("Viewport");
+        viewport.transform.SetParent(scrollGo.transform, false);
+        var viewportRt = viewport.AddComponent<RectTransform>();
+        viewportRt.anchorMin = Vector2.zero; viewportRt.anchorMax = Vector2.one;
+        viewportRt.sizeDelta = Vector2.zero;
+        viewport.AddComponent<RectMask2D>();
+        scrollRect.viewport = viewportRt;
+
+        // Content with GridLayoutGroup
+        var content = new GameObject("Content");
+        content.transform.SetParent(viewport.transform, false);
+        var contentRt = content.AddComponent<RectTransform>();
+        contentRt.anchorMin = new Vector2(0, 1); contentRt.anchorMax = new Vector2(1, 1);
+        contentRt.pivot = new Vector2(0.5f, 1f);
+        contentRt.sizeDelta = new Vector2(0, 3000f); // tall default; FieldGuideController sizes this at runtime
+        var grid = content.AddComponent<GridLayoutGroup>();
+        grid.cellSize = new Vector2(200, 140);
+        grid.spacing = new Vector2(8, 8);
+        grid.padding = new RectOffset(8, 8, 8, 8);
+        grid.constraint = GridLayoutGroup.Constraint.Flexible;
+        scrollRect.content = contentRt;
+
+        // Wire FieldGuideController
+        var fg = panel.AddComponent<FieldGuideController>();
+        fg.gridContent = contentRt;
+
+        // Wire close button
+        closeBtn.GetComponent<Button>().onClick.AddListener(() => panel.SetActive(false));
+
+        panel.SetActive(false);
+        return panel;
     }
 
     static GameObject MakePanel(GameObject parent, string name, Color bgColor, string labelText, bool startActive = false)

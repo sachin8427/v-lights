@@ -46,6 +46,26 @@ Status: done
 
 ---
 
+## Story 3.2 — HUD panels + GameOver flow
+Claim: TitlePanel, GameOverPanel, GUIDE button, FLY AGAIN button all wired. Score displayed correctly on GameOver.
+Verified: TitlePanel shows on launch. GameOver shows "SIGNAL LOST" with real score. FLY AGAIN returns to title. GUIDE button visible on GameOver screen. Fixed: onClick listeners in SceneBuilder are not serialized — all button wiring moved to HUDController.Start().
+Status: done
+
+---
+
+## Story 3.3 — Field Guide
+Claim: Field Guide panel opens from GUIDE button, shows collected/uncollected specimen grid, closes with X.
+Verified: Panel opens on GameOver screen. Grid populates with rarity-colored cells for collected specimens, dark "???" cells for uncollected. X button closes panel. Fixed: (1) Mask component on viewport with alpha=0 Image culled all grid children — replaced with RectMask2D. (2) ContentSizeFitter timing — bypassed with explicit height calculation in FieldGuideController. (3) onClick listeners in SceneBuilder not serialized — close button wired in FieldGuideController.Start().
+Status: done
+
+### Deferred cosmetic/design notes for Field Guide polish story:
+- **Design decision pending**: Current behavior shows all 21 specimens (Pokédex-style, uncollected = "???"). User preference is to show ONLY collected specimens. Original spec says "grey silhouette until captured" — resolve which direction before polish pass.
+- Grid layout and cell design is bare-bones placeholder (colored squares + text). Needs proper card design, specimen icons, scroll indicator.
+- In landscape editor view, grid renders 10 columns (cells are tiny). Game is portrait-only on iOS — test on device or in portrait game view.
+- Panel background should cover entire screen with no bleed-through from GameOver layer.
+
+---
+
 ## Art Asset Inventory (reference — 2026-09-17)
 
 Assets located at: `/Users/sachintayade/Dev/RevenueCat/v-lights/art/`

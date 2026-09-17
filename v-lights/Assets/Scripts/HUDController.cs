@@ -20,6 +20,9 @@ public class HUDController : MonoBehaviour
     public GameObject titlePanel;
     public GameObject gameOverPanel;
     public Text gameOverLabel;
+    public FieldGuideController fieldGuide;
+    public GameObject fieldGuideButton;
+    public Button flyAgainButton;
 
     SamplingBeam _beam;
     PlayerController _player;
@@ -33,6 +36,12 @@ public class HUDController : MonoBehaviour
         AddHold(beamButton, on => _beam.SetBeam(on));
         beamButton.GetComponent<Button>().onClick.AddListener(() => { }); // hold handled by triggers
         boostButton.GetComponent<Button>().onClick.AddListener(DoBoost);
+        if (fieldGuideButton != null)
+            fieldGuideButton.GetComponent<Button>().onClick.AddListener(
+                () => { if (fieldGuide != null) fieldGuide.gameObject.SetActive(true); });
+        if (flyAgainButton != null)
+            flyAgainButton.onClick.AddListener(() => GameManager.I.ReturnToTitle());
+        if (fieldGuide != null) fieldGuide.gameObject.SetActive(false);
         Refresh();
     }
 
@@ -70,8 +79,9 @@ public class HUDController : MonoBehaviour
         hullLabel.text = new string('\u2665', Mathf.Max(0, gm.hull)); // hearts
         wantedLabel.text = "WANTED " + new string('\u25A0', gm.wantedLevel) + new string('\u25A1', 5 - gm.wantedLevel);
 
-        if (titlePanel)    titlePanel.SetActive(gm.State == GameState.Title);
-        if (gameOverPanel) gameOverPanel.SetActive(gm.State == GameState.GameOver);
+        if (titlePanel)       titlePanel.SetActive(gm.State == GameState.Title);
+        if (gameOverPanel)    gameOverPanel.SetActive(gm.State == GameState.GameOver);
+        if (fieldGuideButton) fieldGuideButton.SetActive(gm.State == GameState.GameOver);
         if (gameOverLabel && gm.State == GameState.GameOver)
             gameOverLabel.text = $"SIGNAL LOST\n\nSCORE: {gm.score:N0}\n\nTAP TO FLY AGAIN";
     }

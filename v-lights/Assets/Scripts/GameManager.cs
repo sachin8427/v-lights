@@ -121,12 +121,14 @@ public class GameManager : MonoBehaviour
         if (State == GameState.Title && tapped)
             StartExpedition(1);
 
-        // Tap GameOver panel to return to title (completes the loop)
-        if (State == GameState.GameOver && tapped)
-        {
-            State = GameState.Title;
-            OnHudDirty?.Invoke();
-        }
+        // GameOver → Title is handled by the explicit "FLY AGAIN" button, not tap-anywhere,
+        // so other buttons on the GameOver screen (e.g. GUIDE) don't conflict.
+    }
+
+    public void ReturnToTitle()
+    {
+        State = GameState.Title;
+        OnHudDirty?.Invoke();
     }
 
     public bool IsPlaying => State == GameState.Playing;
