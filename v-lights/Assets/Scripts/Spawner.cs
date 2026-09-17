@@ -17,14 +17,18 @@ public class Spawner : MonoBehaviour
     SamplingBeam _beam;
     Sprite[] _specimenSprites; // parallel to catalog order; assign at runtime via Resources
     Sprite _placeholderSprite;
+    Sprite _chopperSprite, _jetSprite, _balloonSprite;
     float _specTimer, _hazTimer;
 
     void Start()
     {
         _beam = FindObjectOfType<SamplingBeam>();
 
-        // Fallback placeholder sprite used when real art isn't loaded yet
-        _placeholderSprite = MakePlaceholder(new Color(0.9f, 0.85f, 0.2f));
+        // Fallback placeholder sprites (runtime-generated, not serialized into prefabs)
+        _placeholderSprite = MakePlaceholder(new Color(0.9f, 0.85f, 0.2f)); // yellow — specimen
+        _chopperSprite     = MakePlaceholder(new Color(0.8f, 0.2f, 0.2f));  // red
+        _jetSprite         = MakePlaceholder(new Color(0.9f, 0.6f, 0.1f));  // orange
+        _balloonSprite     = MakePlaceholder(new Color(0.3f, 0.8f, 0.3f));  // green
 
         // Specimen sprites: Resources/Specimens/<spriteName> (PNG, no extension in name)
         var cat = GameManager.I.Catalog;
@@ -90,6 +94,18 @@ public class Spawner : MonoBehaviour
         float y = kind == "Balloon" ? Random.Range(-2f, 2f) : Random.Range(0.5f, 3.5f);
         var go = Instantiate(prefab, new Vector3(spawnX + 2f, y, 0), Quaternion.identity);
         go.GetComponent<Hazard>().kind = System.Enum.Parse<HazardKind>(kind);
+
+        // Apply runtime placeholder sprite (prefab sprites don't serialize from MakeSolidSprite)
+        var sr = go.GetComponent<SpriteRenderer>();
+        if (sr != null && sr.sprite == null)
+        {
+            sr.sprite = kind switch
+            {
+                "Jet"     => _jetSprite,
+                "Balloon" => _balloonSprite,
+                _         => _chopperSprite,
+            };
+        }
     }
 
     SpecimenData PickWeighted(ExpeditionData exp)

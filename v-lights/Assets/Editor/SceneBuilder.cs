@@ -63,6 +63,15 @@ public static class SceneBuilder
         playerSr.sortingOrder = 10;
         shipGo.transform.localScale = new Vector3(1.2f, 0.5f, 1f);
 
+        // Collider + Rigidbody required for hazard OnTriggerEnter2D to fire
+        var playerCol = player.AddComponent<CapsuleCollider2D>();
+        playerCol.size = new Vector2(1.0f, 0.5f);
+        var playerRb = player.AddComponent<Rigidbody2D>();
+        playerRb.gravityScale = 0f;
+        playerRb.freezeRotation = true;
+        // Dynamic (not kinematic) so OnTriggerEnter2D fires against hazard triggers.
+        // PlayerController moves via transform.position; gravity=0 keeps it stable.
+
         // ---- SPAWNER ----
         var spawnerGo = new GameObject("Spawner");
         spawnerGo.AddComponent<Spawner>(); // prefabs wired after prefab creation below
