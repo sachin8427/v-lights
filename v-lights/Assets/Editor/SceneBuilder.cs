@@ -112,10 +112,14 @@ public static class SceneBuilder
         hud.boostButton   = boostButton;
 
         // ---- PANELS ----
-        MakePanel(canvasGo, "TitlePanel",     new Color(0f, 0f, 0f, 0.85f), "TAP TO START\n\nV-LIGHTS: Phoenix");
-        MakePanel(canvasGo, "GameOverPanel",  new Color(0f, 0f, 0f, 0.85f), "EXPEDITION COMPLETE\n\nSCORE: 0");
-        MakePanel(canvasGo, "FieldGuidePanel",new Color(0.05f, 0.05f, 0.15f, 0.95f), "FIELD GUIDE\n\n(collection grid — Story 3.3)");
-        MakePanel(canvasGo, "ShopPanel",      new Color(0.05f, 0.05f, 0.15f, 0.95f), "SHOP\n\n(IAP — Story 4.1)");
+        var titlePanel    = MakePanel(canvasGo, "TitlePanel",     new Color(0f, 0f, 0f, 0.85f), "TAP TO START\n\nV-LIGHTS: Phoenix",     startActive: true);
+        var gameOverPanel = MakePanel(canvasGo, "GameOverPanel",  new Color(0f, 0f, 0f, 0.85f), "EXPEDITION COMPLETE\n\nSCORE: 0",        startActive: false);
+        MakePanel(canvasGo, "FieldGuidePanel", new Color(0.05f, 0.05f, 0.15f, 0.95f), "FIELD GUIDE\n\n(collection grid — Story 3.3)", startActive: false);
+        MakePanel(canvasGo, "ShopPanel",       new Color(0.05f, 0.05f, 0.15f, 0.95f), "SHOP\n\n(IAP — Story 4.1)",                    startActive: false);
+
+        // Wire panel refs into HUD
+        hud.titlePanel    = titlePanel;
+        hud.gameOverPanel = gameOverPanel;
 
         // ---- PREFABS ----
         CreateSpecimenPrefab();
@@ -213,7 +217,7 @@ public static class SceneBuilder
         return go;
     }
 
-    static void MakePanel(GameObject parent, string name, Color bgColor, string labelText)
+    static GameObject MakePanel(GameObject parent, string name, Color bgColor, string labelText, bool startActive = false)
     {
         var go = new GameObject(name);
         go.transform.SetParent(parent.transform, false);
@@ -235,7 +239,8 @@ public static class SceneBuilder
         t.alignment = TextAnchor.MiddleCenter;
         t.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
 
-        go.SetActive(false); // all panels hidden by default
+        go.SetActive(startActive);
+        return go;
     }
 
     static void CreateSpecimenPrefab()

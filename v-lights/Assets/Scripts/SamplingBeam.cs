@@ -29,15 +29,17 @@ public class SamplingBeam : MonoBehaviour
         _mr = gameObject.AddComponent<MeshRenderer>();
         _mr.material = new Material(Shader.Find("Sprites/Default"));
         _mr.material.color = beamColor;
-        // Additive-ish: use default sprite shader with transparency; swap to a glow shader later.
-        gameObject.SetActive(false);
+        // Hide the beam mesh only — never disable the GameObject itself, since
+        // SamplingBeam lives on Player (RequireComponent) and disabling the GO
+        // would disable the whole player and break FindObjectOfType in Spawner.
+        _mr.enabled = false;
     }
 
     public void SetBeam(bool on)
     {
         if (!GameManager.I.IsPlaying) on = false;
         Active = on;
-        gameObject.SetActive(on);
+        _mr.enabled = on;
         if (on) BuildMesh();
     }
 

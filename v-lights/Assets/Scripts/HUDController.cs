@@ -16,6 +16,10 @@ public class HUDController : MonoBehaviour
     public GameObject beamButton;  // hold to sample
     public GameObject boostButton; // tap for burst
 
+    [Header("Panels")]
+    public GameObject titlePanel;
+    public GameObject gameOverPanel;
+
     SamplingBeam _beam;
     PlayerController _player;
     float _boostCooldown;
@@ -64,5 +68,8 @@ public class HUDController : MonoBehaviour
         scoreLabel.text = gm.score.ToString("N0");
         hullLabel.text = new string('\u2665', Mathf.Max(0, gm.hull)); // hearts
         wantedLabel.text = "WANTED " + new string('\u25A0', gm.wantedLevel) + new string('\u25A1', 5 - gm.wantedLevel);
+
+        if (titlePanel)    titlePanel.SetActive(gm.State == GameState.Title);
+        if (gameOverPanel) gameOverPanel.SetActive(gm.State == GameState.GameOver);
     }
 }

@@ -100,6 +100,13 @@ public class GameManager : MonoBehaviour
     void Update()
     {
         if (_invulnTimer > 0) _invulnTimer -= Time.deltaTime;
+
+        if (State == GameState.Title)
+        {
+            bool tapped = Input.GetMouseButtonDown(0) ||
+                          (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began);
+            if (tapped) StartExpedition(1);
+        }
     }
 
     public bool IsPlaying => State == GameState.Playing;
