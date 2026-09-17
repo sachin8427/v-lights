@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using UnityEngine;
 
 public enum GameState { Title, Playing, GameOver }
@@ -59,10 +60,12 @@ public class GameManager : MonoBehaviour
         specimensThisRun++;
         specimensThisExpedition++;
         wantedLevel = Mathf.Min(5, specimensThisRun / 2);  // attention grows as you sample
-        bool first = !SaveData.IsCollected(data.id);
         SaveData.SetCollected(data.id);
         OnSpecimenCaptured?.Invoke(data, pts);
         OnHudDirty?.Invoke();
+
+        AudioManager.I?.PlayCapture();
+        if (streak > 0 && streak % 5 == 0) AudioManager.I?.PlayStreak();
 
         if (specimensThisExpedition >= CurrentExpedition.quota)
             CompleteExpedition();
@@ -76,9 +79,24 @@ public class GameManager : MonoBehaviour
         hull--;
         _invulnTimer = 1.2f;
         BreakStreak();
-        // TODO: camera shake + red flash (juice)
+        AudioManager.I?.PlayDamage();
+        StartCoroutine(CameraShake(0.25f, 0.18f));
         if (hull <= 0) GameOver();
         else OnHudDirty?.Invoke();
+    }
+
+    IEnumerator CameraShake(float duration, float magnitude)
+    {
+        var cam = Camera.main;
+        if (cam == null) yield break;
+        var origin = cam.transform.localPosition;
+        for (float t = 0f; t < duration; t += Time.deltaTime)
+        {
+            float decay = 1f - t / duration;
+            cam.transform.localPosition = origin + (Vector3)(UnityEngine.Random.insideUnitCircle * magnitude * decay);
+            yield return null;
+        }
+        cam.transform.localPosition = origin;
     }
 
     void CompleteExpedition()
@@ -96,6 +114,8 @@ public class GameManager : MonoBehaviour
         State = GameState.GameOver;
         if (score > SaveData.HighScore) SaveData.HighScore = score;
         OnHudDirty?.Invoke();
+        AudioManager.I?.PlayGameOver();
+        StartCoroutine(CameraShake(0.4f, 0.25f));
     }
 
     void Update()

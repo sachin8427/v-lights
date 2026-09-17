@@ -76,6 +76,10 @@ public static class SceneBuilder
         var spawnerGo = new GameObject("Spawner");
         spawnerGo.AddComponent<Spawner>(); // prefabs wired after prefab creation below
 
+        // ---- AUDIO MANAGER ----
+        var audioGo = new GameObject("AudioManager");
+        audioGo.AddComponent<AudioManager>();
+
         // ---- IAP MANAGER ----
         var iapGo = new GameObject("IAP");
         iapGo.AddComponent<IAPManager>();

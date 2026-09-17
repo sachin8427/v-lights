@@ -41,6 +41,7 @@ public class SamplingBeam : MonoBehaviour
         Active = on;
         _mr.enabled = on;
         if (on) BuildMesh();
+        AudioManager.I?.SetBeamAudio(on);
     }
 
     void Update()

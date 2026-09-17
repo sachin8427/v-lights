@@ -53,8 +53,20 @@ public class FieldGuideController : MonoBehaviour
         foreach (var data in catalog.specimens)
         {
             if (data.rarity == "Sealed") continue;
+            if (!SaveData.IsCollected(data.id)) continue; // only show captured specimens
             CreateCell(data);
             count++;
+        }
+
+        if (count == 0)
+        {
+            MakeText(gridContent.gameObject, "Empty",
+                "No specimens catalogued yet.\n\nActivate the sampling beam to begin your research.",
+                fontSize: 22, bold: false,
+                anchor: (new Vector2(0.05f, 0.3f), new Vector2(0.95f, 0.7f)),
+                color: new Color(0.6f, 0.6f, 0.7f), alignment: TextAnchor.MiddleCenter);
+            gridContent.sizeDelta = new Vector2(gridContent.sizeDelta.x, 400f);
+            return;
         }
         Debug.Log($"[FieldGuide] Built {count} cells. gridContent={gridContent.name}, catalogLen={catalog.specimens.Length}");
 
@@ -84,36 +96,31 @@ public class FieldGuideController : MonoBehaviour
 
     void CreateCell(SpecimenData data)
     {
-        bool collected = SaveData.IsCollected(data.id);
-
         // Cell root
         var cell = new GameObject(data.id);
         cell.transform.SetParent(gridContent, false);
         cell.AddComponent<RectTransform>(); // sized by GridLayoutGroup
 
         var bg = cell.AddComponent<Image>();
-        bg.color = collected ? RarityColor(data.rarity) : new Color(0.20f, 0.20f, 0.30f, 1f);
+        bg.color = RarityColor(data.rarity);
 
         // Specimen name
-        MakeText(cell, "Name",
-            collected ? data.name : "???",
+        MakeText(cell, "Name", data.name,
             fontSize: 16, bold: true,
             anchor: (new Vector2(0f, 0.62f), Vector2.one),
             color: Color.white, alignment: TextAnchor.UpperCenter);
 
         // Rarity badge
-        MakeText(cell, "Rarity",
-            collected ? data.rarity.ToUpper() : "",
+        MakeText(cell, "Rarity", data.rarity.ToUpper(),
             fontSize: 13, bold: false,
             anchor: (new Vector2(0f, 0.42f), new Vector2(1f, 0.62f)),
             color: new Color(1f, 0.88f, 0.45f), alignment: TextAnchor.MiddleCenter);
 
         // Flavor text (truncated)
-        MakeText(cell, "Flavor",
-            collected ? Truncate(data.flavor, 70) : "",
+        MakeText(cell, "Flavor", Truncate(data.flavor, 70),
             fontSize: 11, bold: false,
             anchor: (Vector2.zero, new Vector2(1f, 0.42f)),
-            color: new Color(0.78f, 0.78f, 0.78f), alignment: TextAnchor.UpperCenter);
+            color: new Color(0.88f, 0.88f, 0.88f), alignment: TextAnchor.UpperCenter);
     }
 
     static void MakeText(GameObject parent, string name, string text,
