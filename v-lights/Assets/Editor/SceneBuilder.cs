@@ -6,6 +6,8 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
+using UnityEngine.Rendering;
+using UnityEngine.Rendering.Universal;
 
 public static class SceneBuilder
 {
@@ -24,26 +26,50 @@ public static class SceneBuilder
         cam.orthographicSize = 5f;
         cam.clearFlags = CameraClearFlags.SolidColor;
         cam.backgroundColor = new Color(0.039f, 0.055f, 0.122f); // #0A0E1F deep navy
+        cam.allowHDR = true;
         camGo.transform.position = new Vector3(0, 0, -10);
         camGo.AddComponent<AudioListener>();
 
-        // ---- BACKGROUND LAYERS (spike) ----
-        // Screen at orthoSize=5, landscape 16:9: ~17.78 wide × 10 tall world units.
-        // tileWidth must exceed screen width to prevent visible seams.
-        //
-        // moonless_starlit_desert_sky.png: 2512×816 px → aspect 3.08:1
-        //   At h=12 (fills screen + margin): w = 3.08×12 = 36.96. TileWidth=37.
-        // saguaro_mid_layer_transparent.png: 2736×912 px → aspect 3.0:1
-        //   At h=6 (tall silhouette strip): w = 3.0×6 = 18. TileWidth=20 (min > 17.78).
+        // URP post-processing — global Volume with Bloom
+        System.IO.Directory.CreateDirectory(
+            System.IO.Path.Combine(Application.dataPath, "PostProcessing"));
+        var ppProfilePath = "Assets/PostProcessing/DefaultPostProcess.asset";
+        var ppProfile = AssetDatabase.LoadAssetAtPath<VolumeProfile>(ppProfilePath);
+        if (ppProfile == null)
+        {
+            ppProfile = ScriptableObject.CreateInstance<VolumeProfile>();
+            AssetDatabase.CreateAsset(ppProfile, ppProfilePath);
+        }
+        if (!ppProfile.Has<Bloom>())
+        {
+            var bloom = ppProfile.Add<Bloom>(overrides: true);
+            bloom.active = true;
+            bloom.intensity.Override(1.3f);
+            bloom.threshold.Override(0.9f);
+            bloom.scatter.Override(0.7f);
+        }
+        AssetDatabase.SaveAssets();
+        var volGo = new GameObject("PostProcessVolume");
+        var vol = volGo.AddComponent<Volume>();
+        vol.isGlobal = true;
+        vol.profile = ppProfile;
 
-        // Far: slow-scrolling sky panorama, behind everything
+        // ---- BACKGROUND LAYERS (spike v2) ----
+        // Screen at orthoSize=5, landscape 16:9: ~17.78 wide × 10 tall world units.
+        // tileWidth is computed from aspect ratio — always > 20 to exceed screen width.
+        //
+        // Layer stack (back → front):
+        //   BackgroundFar     z=10  sortOrder=-10  scroll=0.15  moonless sky panorama
+        //   BackgroundMidCity z=3   sortOrder=-4   scroll=0.6   palm+city silhouette (transparent)
+        //   BackgroundMid     z=5   sortOrder=-3   scroll=0.8   saguaro silhouette (transparent)
+
+        // --- FAR: slow-scrolling sky panorama ---
         var farSprite = ImportSprite("Assets/Art/Backgrounds/moonless_starlit_desert_sky.png",
                                      alphaIsTransparency: false);
         if (farSprite != null)
         {
-            float farAspect = (float)farSprite.texture.width / farSprite.texture.height;
-            float farH = 12f; // slightly taller than screen (ortho=5 → 10 units)
-            float farW = Mathf.Max(20f, farAspect * farH); // 36.96, ensure > screen width
+            float farH = 12f;
+            float farW = Mathf.Max(20f, (float)farSprite.texture.width / farSprite.texture.height * farH);
             var far = new GameObject("BackgroundFar");
             var farSr = far.AddComponent<SpriteRenderer>();
             farSr.sprite = farSprite;
@@ -55,26 +81,43 @@ public static class SceneBuilder
             farPl.tileWidth = farW;
         }
 
-        // Mid: saguaro silhouette strip (transparent bg), faster scroll, near bottom
+        // --- MID-CITY: palm/city skyline, transparent bg, medium scroll ---
+        var citySprite = ImportSprite("Assets/Art/Backgrounds/sparse_palm_skyline_transparent_mask.png",
+                                      alphaIsTransparency: true);
+        if (citySprite != null)
+        {
+            float cityH = 5f; // city silhouette height (bottom half of screen)
+            float cityW = Mathf.Max(20f, (float)citySprite.texture.width / citySprite.texture.height * cityH);
+            var city = new GameObject("BackgroundMidCity");
+            var citySr = city.AddComponent<SpriteRenderer>();
+            citySr.sprite = citySprite;
+            citySr.sortingOrder = -4;
+            city.transform.localScale = SpriteScale(citySprite, cityW, cityH);
+            city.transform.position = new Vector3(0, -2f, 3f);
+            var cityPl = city.AddComponent<ParallaxLayer>();
+            cityPl.scrollFactor = 0.6f;
+            cityPl.tileWidth = cityW;
+        }
+
+        // --- MID: saguaro silhouette strip (transparent), faster scroll ---
         var midSprite = ImportSprite("Assets/Art/Backgrounds/saguaro_mid_layer_transparent.png",
                                      alphaIsTransparency: true);
         if (midSprite != null)
         {
-            float midAspect = (float)midSprite.texture.width / midSprite.texture.height;
-            float midH = 6f; // silhouette strip height
-            float midW = Mathf.Max(20f, midAspect * midH); // 18→clamped to 20
+            float midH = 6f;
+            float midW = Mathf.Max(20f, (float)midSprite.texture.width / midSprite.texture.height * midH);
             var mid = new GameObject("BackgroundMid");
             var midSr = mid.AddComponent<SpriteRenderer>();
             midSr.sprite = midSprite;
-            midSr.sortingOrder = -5;
+            midSr.sortingOrder = -3;
             mid.transform.localScale = SpriteScale(midSprite, midW, midH);
             mid.transform.position = new Vector3(0, -1f, 5f);
             var midPl = mid.AddComponent<ParallaxLayer>();
-            midPl.scrollFactor = 0.4f;
+            midPl.scrollFactor = 0.8f;
             midPl.tileWidth = midW;
         }
 
-        // Ground marker — empty transform, no visual (street art removed for spike)
+        // Ground marker — empty transform, no visual
         var ground = new GameObject("Ground");
         ground.transform.position = new Vector3(0, -3.4f, 0);
 
