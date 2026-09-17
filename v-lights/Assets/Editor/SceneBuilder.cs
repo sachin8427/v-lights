@@ -120,6 +120,7 @@ public static class SceneBuilder
         // Wire panel refs into HUD
         hud.titlePanel    = titlePanel;
         hud.gameOverPanel = gameOverPanel;
+        hud.gameOverLabel = gameOverPanel.GetComponentInChildren<Text>();
 
         // ---- PREFABS ----
         CreateSpecimenPrefab();

@@ -27,16 +27,28 @@ public class Specimen : MonoBehaviour
         if (_captured || !GameManager.I.IsPlaying) return;
 
         bool inBeam = _beam.Active && _beam.Contains(transform.position);
+        var drift = GetComponent<WorldDrift>();
         if (inBeam)
         {
+            // Pause horizontal drift — beam holds specimen in place while pulling
+            if (drift != null) drift.enabled = false;
+
             _progress += Time.deltaTime * _beam.SpeedMultiplier / Data.beamTime;
-            // rise + wobble while being sampled
-            transform.position += Vector3.up * Time.deltaTime * 1.2f;
-            transform.position += Vector3.right * Mathf.Sin(Time.time * 18f) * Time.deltaTime * 0.6f;
+
+            // Magnet pull: draw specimen toward the ship at a speed that gets it
+            // there in roughly beamTime seconds, with a wobble for visual interest
+            float pullSpeed = Vector3.Distance(transform.position, _beam.transform.position)
+                              / Mathf.Max(0.1f, Data.beamTime - _progress * Data.beamTime) + 1f;
+            transform.position = Vector3.MoveTowards(
+                transform.position, _beam.transform.position, pullSpeed * Time.deltaTime);
+            transform.position += Vector3.right * Mathf.Sin(Time.time * 18f) * Time.deltaTime * 0.3f;
+
             if (_progress >= 1f) Capture();
         }
         else
         {
+            if (drift != null) drift.enabled = true;
+
             _progress = Mathf.Max(0, _progress - Time.deltaTime * 0.8f);
             // drift back down + idle bob
             transform.position = Vector3.MoveTowards(transform.position, _groundPos, Time.deltaTime * 1.5f);

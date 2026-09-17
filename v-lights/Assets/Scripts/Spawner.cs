@@ -16,16 +16,30 @@ public class Spawner : MonoBehaviour
 
     SamplingBeam _beam;
     Sprite[] _specimenSprites; // parallel to catalog order; assign at runtime via Resources
+    Sprite _placeholderSprite;
     float _specTimer, _hazTimer;
 
     void Start()
     {
         _beam = FindObjectOfType<SamplingBeam>();
+
+        // Fallback placeholder sprite used when real art isn't loaded yet
+        _placeholderSprite = MakePlaceholder(new Color(0.9f, 0.85f, 0.2f));
+
         // Specimen sprites: Resources/Specimens/<spriteName> (PNG, no extension in name)
         var cat = GameManager.I.Catalog;
         _specimenSprites = new Sprite[cat.specimens.Length];
         for (int i = 0; i < cat.specimens.Length; i++)
             _specimenSprites[i] = Resources.Load<Sprite>("Specimens/" + cat.specimens[i].sprite);
+    }
+
+    static Sprite MakePlaceholder(Color color)
+    {
+        var tex = new Texture2D(16, 16);
+        var pixels = new Color[256];
+        for (int i = 0; i < pixels.Length; i++) pixels[i] = color;
+        tex.SetPixels(pixels); tex.Apply();
+        return Sprite.Create(tex, new Rect(0, 0, 16, 16), new Vector2(0.5f, 0.5f), 16f);
     }
 
     void Update()
@@ -58,7 +72,8 @@ public class Spawner : MonoBehaviour
             new Vector3(spawnX + Random.Range(0f, 3f), groundY + Random.Range(-0.2f, 0.4f), 0),
             Quaternion.identity);
         int idx = System.Array.IndexOf(GameManager.I.Catalog.specimens, data);
-        go.GetComponent<Specimen>().Setup(data, _specimenSprites[idx], _beam);
+        Sprite sprite = idx >= 0 ? _specimenSprites[idx] : null;
+        go.GetComponent<Specimen>().Setup(data, sprite ?? _placeholderSprite, _beam);
         // drift with world scroll
         go.AddComponent<WorldDrift>().speedFactor = 1f;
     }

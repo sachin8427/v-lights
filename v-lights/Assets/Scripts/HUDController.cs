@@ -19,6 +19,7 @@ public class HUDController : MonoBehaviour
     [Header("Panels")]
     public GameObject titlePanel;
     public GameObject gameOverPanel;
+    public Text gameOverLabel;
 
     SamplingBeam _beam;
     PlayerController _player;
@@ -71,5 +72,7 @@ public class HUDController : MonoBehaviour
 
         if (titlePanel)    titlePanel.SetActive(gm.State == GameState.Title);
         if (gameOverPanel) gameOverPanel.SetActive(gm.State == GameState.GameOver);
+        if (gameOverLabel && gm.State == GameState.GameOver)
+            gameOverLabel.text = $"EXPEDITION COMPLETE\n\nSCORE: {gm.score:N0}";
     }
 }
