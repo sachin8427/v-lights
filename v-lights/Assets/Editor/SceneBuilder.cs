@@ -23,86 +23,60 @@ public static class SceneBuilder
         cam.orthographic = true;
         cam.orthographicSize = 5f;
         cam.clearFlags = CameraClearFlags.SolidColor;
-        cam.backgroundColor = new Color(0.05f, 0.05f, 0.12f); // deep desert night blue
+        cam.backgroundColor = new Color(0.039f, 0.055f, 0.122f); // #0A0E1F deep navy
         camGo.transform.position = new Vector3(0, 0, -10);
         camGo.AddComponent<AudioListener>();
 
-        // ---- BACKGROUND LAYERS ----
-        // All images are 2172x724 (3:1 aspect). Game is LANDSCAPE side-scroller.
-        // Ortho size 5 → screen is 10 units tall, ~17.8 units wide in landscape 16:9.
-        // Minimum tile width for no seams = 18 units (just over screen width).
-        // At 3:1 aspect: 18w × 6h tiles fit perfectly with uniform scale.
+        // ---- BACKGROUND LAYERS (spike) ----
+        // Screen at orthoSize=5, landscape 16:9: ~17.78 wide × 10 tall world units.
+        // tileWidth must exceed screen width to prevent visible seams.
         //
-        // Layer stack (back to front):
-        //   BackgroundSky  — moon/stars, STATIC, z=-6
-        //   BackgroundMid  — Phoenix skyline (transparent bg), slow scroll, z=-4
-        //   Ground         — street scene, matches world scroll speed, z=-2
+        // moonless_starlit_desert_sky.png: 2512×816 px → aspect 3.08:1
+        //   At h=12 (fills screen + margin): w = 3.08×12 = 36.96. TileWidth=37.
+        // saguaro_mid_layer_transparent.png: 2736×912 px → aspect 3.0:1
+        //   At h=6 (tall silhouette strip): w = 3.0×6 = 18. TileWidth=20 (min > 17.78).
 
-        // Landscape 16:9 at ortho size 5 → ~17.8 units wide, 10 units tall.
-        // All background images are 2172×724 (3:1 aspect).
-        // tileWidth=20 (>17.8) guarantees no seams. At 3:1: tileHeight=6.67≈7.
-        //
-        // Color tints pull all layers into a unified deep-purple night palette.
-
-        const float TW = 20f;  // tile width  — covers landscape screen (17.8 units)
-        const float TH = 6.67f; // tile height — 3:1 aspect
-
-        // Sky: static, fills entire screen. No tiling needed, just make it wide.
-        var skySprite = ImportSprite("Assets/Art/Backgrounds/moon1.png");
-        if (skySprite != null)
+        // Far: slow-scrolling sky panorama, behind everything
+        var farSprite = ImportSprite("Assets/Art/Backgrounds/moonless_starlit_desert_sky.png",
+                                     alphaIsTransparency: false);
+        if (farSprite != null)
         {
-            var sky = new GameObject("BackgroundSky");
-            var skySr = sky.AddComponent<SpriteRenderer>();
-            skySr.sprite = skySprite;
-            skySr.sortingOrder = -20;
-            skySr.color = new Color(0.7f, 0.7f, 1.0f, 1f); // cool blue tint
-            sky.transform.localScale = SpriteScale(skySprite, 40f, 12f); // 40w covers 2× screen
-            sky.transform.position = new Vector3(0, 0.5f, -6f);
+            float farAspect = (float)farSprite.texture.width / farSprite.texture.height;
+            float farH = 12f; // slightly taller than screen (ortho=5 → 10 units)
+            float farW = Mathf.Max(20f, farAspect * farH); // 36.96, ensure > screen width
+            var far = new GameObject("BackgroundFar");
+            var farSr = far.AddComponent<SpriteRenderer>();
+            farSr.sprite = farSprite;
+            farSr.sortingOrder = -10;
+            far.transform.localScale = SpriteScale(farSprite, farW, farH);
+            far.transform.position = new Vector3(0, 0, 10f);
+            var farPl = far.AddComponent<ParallaxLayer>();
+            farPl.scrollFactor = 0.15f;
+            farPl.tileWidth = farW;
         }
-        else
-            CreateBgLayer("BackgroundSky", 0f, new Color(0.05f, 0.05f, 0.14f), -6f, 0f, -20f);
 
-        // Mid: Phoenix skyline cutout (transparent bg), slow scroll
-        var skylineSprite = ImportSprite("Assets/Art/Backgrounds/camelback1.png");
-        if (skylineSprite != null)
+        // Mid: saguaro silhouette strip (transparent bg), faster scroll, near bottom
+        var midSprite = ImportSprite("Assets/Art/Backgrounds/saguaro_mid_layer_transparent.png",
+                                     alphaIsTransparency: true);
+        if (midSprite != null)
         {
+            float midAspect = (float)midSprite.texture.width / midSprite.texture.height;
+            float midH = 6f; // silhouette strip height
+            float midW = Mathf.Max(20f, midAspect * midH); // 18→clamped to 20
             var mid = new GameObject("BackgroundMid");
             var midSr = mid.AddComponent<SpriteRenderer>();
-            midSr.sprite = skylineSprite;
-            midSr.sortingOrder = -10;
-            midSr.color = new Color(0.8f, 0.75f, 1.0f, 1f); // warm purple tint
-            mid.transform.localScale = SpriteScale(skylineSprite, TW, TH);
-            mid.transform.position = new Vector3(0, -1.5f, -4f);
+            midSr.sprite = midSprite;
+            midSr.sortingOrder = -5;
+            mid.transform.localScale = SpriteScale(midSprite, midW, midH);
+            mid.transform.position = new Vector3(0, -1f, 5f);
             var midPl = mid.AddComponent<ParallaxLayer>();
-            midPl.scrollFactor = 0.3f;
-            midPl.tileWidth = TW;
+            midPl.scrollFactor = 0.4f;
+            midPl.tileWidth = midW;
         }
-        else
-            CreateBgLayer("BackgroundMid", 0.3f, new Color(0.20f, 0.14f, 0.30f), -4f, -1.5f, -10f);
 
-        // Foreground street strip — positioned at bottom, tinted night-blue
-        var streetSprite = ImportSprite("Assets/Art/Backgrounds/street1.png");
+        // Ground marker — empty transform, no visual (street art removed for spike)
         var ground = new GameObject("Ground");
-        var groundSr = ground.AddComponent<SpriteRenderer>();
-        if (streetSprite != null)
-        {
-            groundSr.sprite = streetSprite;
-            groundSr.sortingOrder = -5;
-            groundSr.color = new Color(0.85f, 0.82f, 1.0f, 1f); // slight purple tint
-            ground.transform.localScale = SpriteScale(streetSprite, TW, TH);
-            // Bottom edge at y=-5 (screen bottom): center = -5 + TH/2
-            ground.transform.position = new Vector3(0, -5f + TH * 0.5f, -2f);
-            var streetPl = ground.AddComponent<ParallaxLayer>();
-            streetPl.scrollFactor = 1f;
-            streetPl.tileWidth = TW;
-        }
-        else
-        {
-            groundSr.sprite = MakeSolidSprite(new Color(0.08f, 0.05f, 0.10f));
-            groundSr.drawMode = SpriteDrawMode.Sliced;
-            ground.transform.position = new Vector3(0, -4.5f, 0);
-            ground.transform.localScale = new Vector3(30f, 1f, 1f);
-        }
+        ground.transform.position = new Vector3(0, -3.4f, 0);
 
         // ---- GAME MANAGER ----
         var gmGo = new GameObject("GameManager");
@@ -240,7 +214,8 @@ public static class SceneBuilder
     // ---- Helpers ----
 
     // Import a PNG at assetPath as a Sprite, setting correct import settings.
-    static Sprite ImportSprite(string assetPath)
+    // alphaIsTransparency=true: use input texture's alpha channel (e.g. transparent PNG bg).
+    static Sprite ImportSprite(string assetPath, bool alphaIsTransparency = false)
     {
         if (!System.IO.File.Exists(System.IO.Path.Combine(Application.dataPath, "..", assetPath)))
             return null;
@@ -249,10 +224,19 @@ public static class SceneBuilder
         if (importer != null)
         {
             bool changed = false;
-            if (importer.textureType != TextureImporterType.Sprite)      { importer.textureType = TextureImporterType.Sprite; changed = true; }
-            if (importer.spriteImportMode != SpriteImportMode.Single)    { importer.spriteImportMode = SpriteImportMode.Single; changed = true; }
-            if (!importer.alphaIsTransparency)                            { importer.alphaIsTransparency = true; changed = true; }
-            if (importer.mipmapEnabled)                                   { importer.mipmapEnabled = false; changed = true; }
+            if (importer.textureType != TextureImporterType.Sprite)                    { importer.textureType = TextureImporterType.Sprite; changed = true; }
+            if (importer.spriteImportMode != SpriteImportMode.Single)                  { importer.spriteImportMode = SpriteImportMode.Single; changed = true; }
+            if (importer.alphaIsTransparency != alphaIsTransparency)                   { importer.alphaIsTransparency = alphaIsTransparency; changed = true; }
+            if (importer.mipmapEnabled)                                                 { importer.mipmapEnabled = false; changed = true; }
+            if (importer.spritePPU != 100)                                             { importer.spritePPU = 100; changed = true; }
+            if (importer.filterMode != FilterMode.Bilinear)                            { importer.filterMode = FilterMode.Bilinear; changed = true; }
+            var settings = importer.GetDefaultPlatformTextureSettings();
+            if (settings.textureCompression != TextureImporterCompression.Uncompressed) {
+                settings.textureCompression = TextureImporterCompression.Uncompressed;
+                importer.SetPlatformTextureSettings(settings);
+                changed = true;
+            }
+            if (importer.wrapMode != TextureWrapMode.Clamp)                            { importer.wrapMode = TextureWrapMode.Clamp; changed = true; }
             if (changed) AssetDatabase.ImportAsset(assetPath, ImportAssetOptions.ForceUpdate);
         }
         return AssetDatabase.LoadAssetAtPath<Sprite>(assetPath);
