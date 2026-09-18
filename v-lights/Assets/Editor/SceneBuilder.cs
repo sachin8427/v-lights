@@ -105,9 +105,10 @@ public static class SceneBuilder
             var mtPl = mtLayer.AddComponent<ParallaxLayer>();
             mtPl.scrollFactor = 0f; // static — set to 0.25 after composition approved
 
-            // Bottom edge at y=-1 (horizon). Center = -1 + spriteWorldHeight/2
+            // Horizon at 35% from screen bottom: y = -5 + 0.35*10 = -1.5
+            // Center = horizonY + spriteWorldHeight/2
             float mtH = mtSprite.bounds.size.y * mtScale;
-            float mtY = -1f + mtH * 0.5f;
+            float mtY = -1.5f + mtH * 0.5f;
             MakeTileSprite("Mountains_A", mtSprite, -8, mtScale, new Vector3(0f,  mtY, 6f), mtLayer);
             MakeTileSprite("Mountains_B", mtSprite, -8, mtScale, new Vector3(mtW, mtY, 6f), mtLayer);
         }
@@ -127,9 +128,9 @@ public static class SceneBuilder
             var ctPl = ctLayer.AddComponent<ParallaxLayer>();
             ctPl.scrollFactor = 0f; // static — set to 0.60 after composition approved
 
-            // Position below mountains: bottom edge at y=-2
+            // Bottom edge pinned to camera bottom (y=-5) — city's transparent top shows sky/mountains.
             float ctH = ctSprite.bounds.size.y * ctScale;
-            float ctY = -2f + ctH * 0.5f;
+            float ctY = -5f + ctH * 0.5f;
             MakeTileSprite("City_A", ctSprite, -5, ctScale, new Vector3(0f,  ctY, 3f), ctLayer);
             MakeTileSprite("City_B", ctSprite, -5, ctScale, new Vector3(ctW, ctY, 3f), ctLayer);
         }
