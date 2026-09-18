@@ -54,61 +54,84 @@ public static class SceneBuilder
         vol.isGlobal = true;
         vol.profile = ppProfile;
 
-        // ---- BACKGROUND LAYERS ----
-        // Infinite scroll via material.mainTextureOffset — no tile seams, no teleporting GOs.
-        // Screen at orthoSize=5: 10 units tall. iPhone 19.5:9 → 21.67 wide. Use W=22 for full coverage.
+        // ---- BACKGROUND LAYERS — A/B sprite recycling ----
+        // Each layer = one ParallaxLayer parent + two SpriteRenderer children (A and B).
+        // A fills the camera; B starts one sprite-width to the right (off-screen).
+        // When either tile scrolls past the camera left edge it teleports to the right of the other.
         //
-        // sky_parallax_layer.png:    2048×1152 (16:9) → fill full screen at (22 × 12)
-        // mountain_parallax_layer.png: 2736×912  (3:1) → thin strip at (22 × 1.5), y=-1
-        // city_parallax_layer.png:   2096×1184 (1.77:1) → thin strip at (22 × 1.2), y=-2.5
+        // Scale rule: UNIFORM scale — max(minW/naturalW, minH/naturalH).
+        // minW=22 (covers iPhone 19.5:9 = 21.67 world units wide at ortho=5).
+        // minH=10 (camera height at ortho=5). This guarantees no camera-background bleed.
         //
-        // Layer stack (back → front):
-        //   Background_Sky       z=10  sortOrder=-10  scroll=0.05
-        //   Background_Mountains z=6   sortOrder=-8   scroll=0.25
-        //   Background_City      z=3   sortOrder=-5   scroll=0.6
+        //  Layer         z    sortOrder  scrollFactor (ALL 0 — static for composition review)
+        //  SkyLayer      10      -10         0
+        //  MountainsLayer 6      -8          0
+        //  CityLayer      3      -5          0
 
-        // Sky — fills entire screen, slowest scroll
-        var skySprite = ImportSprite("Assets/Art/Backgrounds/sky_parallax_layer.png", alphaIsTransparency: false);
+        var parallaxRoot = new GameObject("ParallaxRoot");
+
+        // ---- SKY ----
+        var skySprite = ImportSprite("Assets/Art/Backgrounds/sky_parallax_layer.png",
+                                     alphaIsTransparency: false, wrapRepeat: false);
         if (skySprite != null)
         {
-            var sky = new GameObject("Background_Sky");
-            var skySr = sky.AddComponent<SpriteRenderer>();
-            skySr.sprite = skySprite;
-            skySr.sortingOrder = -10;
-            sky.transform.localScale = SpriteScale(skySprite, 22f, 12f);
-            sky.transform.position = new Vector3(0, 0, 10f);
-            var skyPl = sky.AddComponent<ParallaxLayer>();
-            skyPl.scrollFactor = 0.05f;
+            // sky_parallax_layer.png: 2048×1152 (16:9 aspect)
+            // naturalW=20.48, naturalH=11.52 at PPU=100
+            float skyScale = Mathf.Max(22f / skySprite.bounds.size.x, 10f / skySprite.bounds.size.y);
+            float skyW = skySprite.bounds.size.x * skyScale;
+
+            var skyLayer = new GameObject("SkyLayer");
+            skyLayer.transform.SetParent(parallaxRoot.transform);
+            var skyPl = skyLayer.AddComponent<ParallaxLayer>();
+            skyPl.scrollFactor = 0f; // static — set to 0.05 after composition approved
+
+            var skyA = MakeTileSprite("Sky_A", skySprite, -10, skyScale, new Vector3(0f,   0f, 10f), skyLayer);
+            var skyB = MakeTileSprite("Sky_B", skySprite, -10, skyScale, new Vector3(skyW, 0f, 10f), skyLayer);
         }
 
-        // Mountains — thin silhouette strip, medium scroll
-        var mtSprite = ImportSprite("Assets/Art/Backgrounds/mountain_parallax_layer.png", alphaIsTransparency: true);
+        // ---- MOUNTAINS ----
+        var mtSprite = ImportSprite("Assets/Art/Backgrounds/mountain_parallax_layer.png",
+                                    alphaIsTransparency: true, wrapRepeat: false);
         if (mtSprite != null)
         {
-            var mt = new GameObject("Background_Mountains");
-            var mtSr = mt.AddComponent<SpriteRenderer>();
-            mtSr.sprite = mtSprite;
-            mtSr.sortingOrder = -8;
-            // Scale to 22 wide to cover iPhone 19.5:9; height 1.5 as specified
-            mt.transform.localScale = SpriteScale(mtSprite, 22f, 1.5f);
-            mt.transform.position = new Vector3(0, -1f, 6f);
-            var mtPl = mt.AddComponent<ParallaxLayer>();
-            mtPl.scrollFactor = 0.25f;
+            // mountain_parallax_layer.png: 2736×912 (3:1 aspect)
+            // naturalW=27.36, naturalH=9.12 at PPU=100
+            // naturalW already > 22, so scale is driven by height: 10/9.12 = 1.096
+            float mtScale = Mathf.Max(22f / mtSprite.bounds.size.x, 10f / mtSprite.bounds.size.y);
+            float mtW = mtSprite.bounds.size.x * mtScale;
+
+            var mtLayer = new GameObject("MountainsLayer");
+            mtLayer.transform.SetParent(parallaxRoot.transform);
+            var mtPl = mtLayer.AddComponent<ParallaxLayer>();
+            mtPl.scrollFactor = 0f; // static — set to 0.25 after composition approved
+
+            // Bottom edge at y=-1 (horizon). Center = -1 + spriteWorldHeight/2
+            float mtH = mtSprite.bounds.size.y * mtScale;
+            float mtY = -1f + mtH * 0.5f;
+            MakeTileSprite("Mountains_A", mtSprite, -8, mtScale, new Vector3(0f,  mtY, 6f), mtLayer);
+            MakeTileSprite("Mountains_B", mtSprite, -8, mtScale, new Vector3(mtW, mtY, 6f), mtLayer);
         }
 
-        // City — thin strip at bottom, fastest foreground scroll
-        var ctSprite = ImportSprite("Assets/Art/Backgrounds/city_parallax_layer.png", alphaIsTransparency: true);
+        // ---- CITY ----
+        var ctSprite = ImportSprite("Assets/Art/Backgrounds/city_parallax_layer.png",
+                                    alphaIsTransparency: true, wrapRepeat: false);
         if (ctSprite != null)
         {
-            var ct = new GameObject("Background_City");
-            var ctSr = ct.AddComponent<SpriteRenderer>();
-            ctSr.sprite = ctSprite;
-            ctSr.sortingOrder = -5;
-            // Scale to 22 wide; height 1.2 as specified
-            ct.transform.localScale = SpriteScale(ctSprite, 22f, 1.2f);
-            ct.transform.position = new Vector3(0, -2.5f, 3f);
-            var ctPl = ct.AddComponent<ParallaxLayer>();
-            ctPl.scrollFactor = 0.6f;
+            // city_parallax_layer.png: 2096×1184 (1.77:1 aspect)
+            // naturalW=20.96, naturalH=11.84 at PPU=100
+            float ctScale = Mathf.Max(22f / ctSprite.bounds.size.x, 10f / ctSprite.bounds.size.y);
+            float ctW = ctSprite.bounds.size.x * ctScale;
+
+            var ctLayer = new GameObject("CityLayer");
+            ctLayer.transform.SetParent(parallaxRoot.transform);
+            var ctPl = ctLayer.AddComponent<ParallaxLayer>();
+            ctPl.scrollFactor = 0f; // static — set to 0.60 after composition approved
+
+            // Position below mountains: bottom edge at y=-2
+            float ctH = ctSprite.bounds.size.y * ctScale;
+            float ctY = -2f + ctH * 0.5f;
+            MakeTileSprite("City_A", ctSprite, -5, ctScale, new Vector3(0f,  ctY, 3f), ctLayer);
+            MakeTileSprite("City_B", ctSprite, -5, ctScale, new Vector3(ctW, ctY, 3f), ctLayer);
         }
 
         // Ground marker — empty transform, no visual
@@ -307,8 +330,24 @@ public static class SceneBuilder
     }
 
     // Returns localScale to display a sprite at the given world dimensions (worldW x worldH units).
+    // NOTE: this stretches independently — only use for non-parallax UI sprites.
     static Vector3 SpriteScale(Sprite sprite, float worldW, float worldH) =>
         new Vector3(worldW / sprite.bounds.size.x, worldH / sprite.bounds.size.y, 1f);
+
+    // Create one A or B parallax tile: SpriteRenderer child under 'parent' at world position.
+    // uniformScale preserves the sprite's source aspect ratio exactly.
+    static GameObject MakeTileSprite(string name, Sprite sprite, int sortOrder,
+                                     float uniformScale, Vector3 worldPos, GameObject parent)
+    {
+        var go = new GameObject(name);
+        go.transform.SetParent(parent.transform);
+        go.transform.localScale = new Vector3(uniformScale, uniformScale, 1f);
+        go.transform.position = worldPos;
+        var sr = go.AddComponent<SpriteRenderer>();
+        sr.sprite = sprite;
+        sr.sortingOrder = sortOrder;
+        return go;
+    }
 
     static void CreateBgLayer(string name, float scrollFactor, Color color, float z, float y, float sortOrder)
     {
