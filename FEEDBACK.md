@@ -99,6 +99,45 @@ Assets located at: `/Users/sachintayade/Dev/RevenueCat/v-lights/art/`
 - Hazard sprites (chopper, jet, balloon)
 - WebP → PNG conversion required before Unity import (`sips -s format png`)
 
+---
+
+## Spike — Background Parallax System (`spike/background-system`)
+
+### What was attempted
+Full background parallax rewrite across multiple iterations:
+1. **Attempt 1** — `material.mainTextureOffset` on SpriteRenderer (Wrap=Repeat). Failed: sky mirrored/duplicated vertically at UV boundary (Clamp artefact), mountains/city squished into thin strips (non-uniform X/Y scale).
+2. **Attempt 2** — A/B dual-sprite recycling with uniform aspect-ratio-correct scaling. Improved: sky correct, mountains and city visible at proper scale. Remaining issue: city bottom edge sat at y=−2 leaving a 3-unit gap to camera bottom (y=−5) through which the sky bled through again.
+3. **Attempt 3 (current)** — Same A/B approach, city bottom anchored to camera bottom (y=−5), mountain horizon shifted to 35% from screen bottom (y=−1.5).
+
+### Verified
+- Sky fills full viewport, no mirroring, no UV artefacts
+- Mountains visible at correct aspect ratio, horizon at ~35% from bottom
+- City bottom flush with camera bottom — sky bleed-through gap eliminated (pending visual confirmation in Unity after last push)
+- All parallax scroll speeds = 0 (static composition mode)
+- Scene compiles and enters Play mode cleanly
+
+### Current state (branch: `spike/background-system`, not merged)
+**Pending approval** of static composition before scrolling is re-enabled.
+Next steps when resuming:
+1. Run VLights > Build Scene Hierarchy in Unity and confirm static composition looks correct (no sky bleed below city)
+2. If approved: set scrollFactor sky=0.05, mountains=0.25, city=0.60 in SceneBuilder and re-run
+3. If further position tuning needed: adjust `ctY` and `mtY` constants in SceneBuilder background section
+4. After scrolling approved: merge spike → main, close spike branch
+
+### Assets in project (`Assets/Art/Backgrounds/`)
+| File | Layer | Scale | Notes |
+|---|---|---|---|
+| `sky_parallax_layer.png` | Background_Sky (z=10, order=-10) | uniform ~1.074, world 22×12.4 | 2048×1152 (16:9) |
+| `mountain_parallax_layer.png` | MountainsLayer (z=6, order=-8) | uniform ~1.096, world 30×10 | 2736×912 (3:1) |
+| `city_parallax_layer.png` | CityLayer (z=3, order=-5) | uniform ~1.050, world 22×12.4 | 2096×1184 (1.77:1) |
+
+### Known risk areas for next session
+- **City image content unknown** — if city image has buildings throughout (not just bottom 25%), vertical position alone may not achieve "25-30% city mass" target. May need to revisit scale or crop.
+- **ParallaxLayer.Start()** repositions B tile at runtime. If SceneBuilder places B at a different position than computed, a single-frame pop may be visible on scene load — verify on device.
+- **Bloom/URP post-processing** added to SceneBuilder (PostProcessing/DefaultPostProcess.asset) but not verified visually. Camera HDR=true set.
+
+---
+
 ### Key design notes from mockups
 - Deep purple/navy night sky ✓ (already in game)
 - Rainbow beam = vlights_rainbow_lights IAP skin
