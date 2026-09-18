@@ -265,7 +265,15 @@ public static class SceneBuilder
             var wrap = wrapRepeat ? TextureWrapMode.Repeat : TextureWrapMode.Clamp;
             if (importer.textureType != TextureImporterType.Sprite)      { importer.textureType = TextureImporterType.Sprite; changed = true; }
             if (importer.spriteImportMode != SpriteImportMode.Single)    { importer.spriteImportMode = SpriteImportMode.Single; changed = true; }
-            if (importer.spriteMeshType != SpriteMeshType.FullRect)      { importer.spriteMeshType = SpriteMeshType.FullRect; changed = true; }
+            // spriteMeshType must be set via TextureImporterSettings
+            var texSettings = new TextureImporterSettings();
+            importer.ReadTextureSettings(texSettings);
+            if (texSettings.spriteMeshType != SpriteMeshType.FullRect)
+            {
+                texSettings.spriteMeshType = SpriteMeshType.FullRect;
+                importer.SetTextureSettings(texSettings);
+                changed = true;
+            }
             if (importer.alphaIsTransparency != alphaIsTransparency)     { importer.alphaIsTransparency = alphaIsTransparency; changed = true; }
             if (importer.mipmapEnabled)                                   { importer.mipmapEnabled = false; changed = true; }
             if (importer.spritePixelsPerUnit != 100)                     { importer.spritePixelsPerUnit = 100; changed = true; }
