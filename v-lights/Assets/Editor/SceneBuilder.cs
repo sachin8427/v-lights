@@ -54,67 +54,61 @@ public static class SceneBuilder
         vol.isGlobal = true;
         vol.profile = ppProfile;
 
-        // ---- BACKGROUND LAYERS (spike v2) ----
-        // Screen at orthoSize=5, landscape 16:9: ~17.78 wide × 10 tall world units.
-        // tileWidth is computed from aspect ratio — always > 20 to exceed screen width.
+        // ---- BACKGROUND LAYERS ----
+        // Infinite scroll via material.mainTextureOffset — no tile seams, no teleporting GOs.
+        // Screen at orthoSize=5: 10 units tall. iPhone 19.5:9 → 21.67 wide. Use W=22 for full coverage.
+        //
+        // sky_parallax_layer.png:    2048×1152 (16:9) → fill full screen at (22 × 12)
+        // mountain_parallax_layer.png: 2736×912  (3:1) → thin strip at (22 × 1.5), y=-1
+        // city_parallax_layer.png:   2096×1184 (1.77:1) → thin strip at (22 × 1.2), y=-2.5
         //
         // Layer stack (back → front):
-        //   BackgroundFar     z=10  sortOrder=-10  scroll=0.15  moonless sky panorama
-        //   BackgroundMidCity z=3   sortOrder=-4   scroll=0.6   palm+city silhouette (transparent)
-        //   BackgroundMid     z=5   sortOrder=-3   scroll=0.8   saguaro silhouette (transparent)
+        //   Background_Sky       z=10  sortOrder=-10  scroll=0.05
+        //   Background_Mountains z=6   sortOrder=-8   scroll=0.25
+        //   Background_City      z=3   sortOrder=-5   scroll=0.6
 
-        // --- FAR: slow-scrolling sky panorama ---
-        var farSprite = ImportSprite("Assets/Art/Backgrounds/moonless_starlit_desert_sky.png",
-                                     alphaIsTransparency: false);
-        if (farSprite != null)
+        // Sky — fills entire screen, slowest scroll
+        var skySprite = ImportSprite("Assets/Art/Backgrounds/sky_parallax_layer.png", alphaIsTransparency: false);
+        if (skySprite != null)
         {
-            float farH = 12f;
-            float farW = Mathf.Max(20f, (float)farSprite.texture.width / farSprite.texture.height * farH);
-            var far = new GameObject("BackgroundFar");
-            var farSr = far.AddComponent<SpriteRenderer>();
-            farSr.sprite = farSprite;
-            farSr.sortingOrder = -10;
-            far.transform.localScale = SpriteScale(farSprite, farW, farH);
-            far.transform.position = new Vector3(0, 0, 10f);
-            var farPl = far.AddComponent<ParallaxLayer>();
-            farPl.scrollFactor = 0.15f;
-            farPl.tileWidth = farW;
+            var sky = new GameObject("Background_Sky");
+            var skySr = sky.AddComponent<SpriteRenderer>();
+            skySr.sprite = skySprite;
+            skySr.sortingOrder = -10;
+            sky.transform.localScale = SpriteScale(skySprite, 22f, 12f);
+            sky.transform.position = new Vector3(0, 0, 10f);
+            var skyPl = sky.AddComponent<ParallaxLayer>();
+            skyPl.scrollFactor = 0.05f;
         }
 
-        // --- MID-CITY: palm/city skyline, transparent bg, medium scroll ---
-        var citySprite = ImportSprite("Assets/Art/Backgrounds/sparse_palm_skyline_transparent_mask.png",
-                                      alphaIsTransparency: true);
-        if (citySprite != null)
+        // Mountains — thin silhouette strip, medium scroll
+        var mtSprite = ImportSprite("Assets/Art/Backgrounds/mountain_parallax_layer.png", alphaIsTransparency: true);
+        if (mtSprite != null)
         {
-            float cityH = 5f; // city silhouette height (bottom half of screen)
-            float cityW = Mathf.Max(20f, (float)citySprite.texture.width / citySprite.texture.height * cityH);
-            var city = new GameObject("BackgroundMidCity");
-            var citySr = city.AddComponent<SpriteRenderer>();
-            citySr.sprite = citySprite;
-            citySr.sortingOrder = -4;
-            city.transform.localScale = SpriteScale(citySprite, cityW, cityH);
-            city.transform.position = new Vector3(0, -2f, 3f);
-            var cityPl = city.AddComponent<ParallaxLayer>();
-            cityPl.scrollFactor = 0.6f;
-            cityPl.tileWidth = cityW;
+            var mt = new GameObject("Background_Mountains");
+            var mtSr = mt.AddComponent<SpriteRenderer>();
+            mtSr.sprite = mtSprite;
+            mtSr.sortingOrder = -8;
+            // Scale to 22 wide to cover iPhone 19.5:9; height 1.5 as specified
+            mt.transform.localScale = SpriteScale(mtSprite, 22f, 1.5f);
+            mt.transform.position = new Vector3(0, -1f, 6f);
+            var mtPl = mt.AddComponent<ParallaxLayer>();
+            mtPl.scrollFactor = 0.25f;
         }
 
-        // --- MID: saguaro silhouette strip (transparent), faster scroll ---
-        var midSprite = ImportSprite("Assets/Art/Backgrounds/saguaro_mid_layer_transparent.png",
-                                     alphaIsTransparency: true);
-        if (midSprite != null)
+        // City — thin strip at bottom, fastest foreground scroll
+        var ctSprite = ImportSprite("Assets/Art/Backgrounds/city_parallax_layer.png", alphaIsTransparency: true);
+        if (ctSprite != null)
         {
-            float midH = 6f;
-            float midW = Mathf.Max(20f, (float)midSprite.texture.width / midSprite.texture.height * midH);
-            var mid = new GameObject("BackgroundMid");
-            var midSr = mid.AddComponent<SpriteRenderer>();
-            midSr.sprite = midSprite;
-            midSr.sortingOrder = -3;
-            mid.transform.localScale = SpriteScale(midSprite, midW, midH);
-            mid.transform.position = new Vector3(0, -1f, 5f);
-            var midPl = mid.AddComponent<ParallaxLayer>();
-            midPl.scrollFactor = 0.8f;
-            midPl.tileWidth = midW;
+            var ct = new GameObject("Background_City");
+            var ctSr = ct.AddComponent<SpriteRenderer>();
+            ctSr.sprite = ctSprite;
+            ctSr.sortingOrder = -5;
+            // Scale to 22 wide; height 1.2 as specified
+            ct.transform.localScale = SpriteScale(ctSprite, 22f, 1.2f);
+            ct.transform.position = new Vector3(0, -2.5f, 3f);
+            var ctPl = ct.AddComponent<ParallaxLayer>();
+            ctPl.scrollFactor = 0.6f;
         }
 
         // Ground marker — empty transform, no visual
@@ -256,9 +250,10 @@ public static class SceneBuilder
 
     // ---- Helpers ----
 
-    // Import a PNG at assetPath as a Sprite, setting correct import settings.
-    // alphaIsTransparency=true: use input texture's alpha channel (e.g. transparent PNG bg).
-    static Sprite ImportSprite(string assetPath, bool alphaIsTransparency = false)
+    // Import a PNG as a Sprite with background-layer settings.
+    //   alphaIsTransparency: true for layers with transparent alpha channel
+    //   wrapRepeat: true (default) for parallax layers — required for mainTextureOffset looping
+    static Sprite ImportSprite(string assetPath, bool alphaIsTransparency = false, bool wrapRepeat = true)
     {
         if (!System.IO.File.Exists(System.IO.Path.Combine(Application.dataPath, "..", assetPath)))
             return null;
@@ -267,19 +262,37 @@ public static class SceneBuilder
         if (importer != null)
         {
             bool changed = false;
-            if (importer.textureType != TextureImporterType.Sprite)                    { importer.textureType = TextureImporterType.Sprite; changed = true; }
-            if (importer.spriteImportMode != SpriteImportMode.Single)                  { importer.spriteImportMode = SpriteImportMode.Single; changed = true; }
-            if (importer.alphaIsTransparency != alphaIsTransparency)                   { importer.alphaIsTransparency = alphaIsTransparency; changed = true; }
-            if (importer.mipmapEnabled)                                                 { importer.mipmapEnabled = false; changed = true; }
-            if (importer.spritePixelsPerUnit != 100)                                    { importer.spritePixelsPerUnit = 100; changed = true; }
-            if (importer.filterMode != FilterMode.Bilinear)                            { importer.filterMode = FilterMode.Bilinear; changed = true; }
-            var settings = importer.GetDefaultPlatformTextureSettings();
-            if (settings.textureCompression != TextureImporterCompression.Uncompressed) {
-                settings.textureCompression = TextureImporterCompression.Uncompressed;
-                importer.SetPlatformTextureSettings(settings);
+            var wrap = wrapRepeat ? TextureWrapMode.Repeat : TextureWrapMode.Clamp;
+            if (importer.textureType != TextureImporterType.Sprite)      { importer.textureType = TextureImporterType.Sprite; changed = true; }
+            if (importer.spriteImportMode != SpriteImportMode.Single)    { importer.spriteImportMode = SpriteImportMode.Single; changed = true; }
+            if (importer.spriteMeshType != SpriteMeshType.FullRect)      { importer.spriteMeshType = SpriteMeshType.FullRect; changed = true; }
+            if (importer.alphaIsTransparency != alphaIsTransparency)     { importer.alphaIsTransparency = alphaIsTransparency; changed = true; }
+            if (importer.mipmapEnabled)                                   { importer.mipmapEnabled = false; changed = true; }
+            if (importer.spritePixelsPerUnit != 100)                     { importer.spritePixelsPerUnit = 100; changed = true; }
+            if (importer.filterMode != FilterMode.Bilinear)              { importer.filterMode = FilterMode.Bilinear; changed = true; }
+            if (importer.wrapMode != wrap)                               { importer.wrapMode = wrap; changed = true; }
+
+            // Default platform: uncompressed for editor accuracy
+            var defSettings = importer.GetDefaultPlatformTextureSettings();
+            if (defSettings.maxTextureSize != 2048 || defSettings.textureCompression != TextureImporterCompression.Uncompressed)
+            {
+                defSettings.maxTextureSize = 2048;
+                defSettings.textureCompression = TextureImporterCompression.Uncompressed;
+                importer.SetPlatformTextureSettings(defSettings);
                 changed = true;
             }
-            if (importer.wrapMode != TextureWrapMode.Clamp)                            { importer.wrapMode = TextureWrapMode.Clamp; changed = true; }
+
+            // iOS: ASTC 6x6 — best quality/size for Metal on iPhone
+            var iosSettings = importer.GetPlatformTextureSettings("iPhone");
+            if (!iosSettings.overridden || iosSettings.maxTextureSize != 2048 || iosSettings.format != TextureImporterFormat.ASTC_6x6)
+            {
+                iosSettings.overridden = true;
+                iosSettings.maxTextureSize = 2048;
+                iosSettings.format = TextureImporterFormat.ASTC_6x6;
+                importer.SetPlatformTextureSettings(iosSettings);
+                changed = true;
+            }
+
             if (changed) AssetDatabase.ImportAsset(assetPath, ImportAssetOptions.ForceUpdate);
         }
         return AssetDatabase.LoadAssetAtPath<Sprite>(assetPath);
